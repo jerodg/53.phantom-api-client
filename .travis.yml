@@ -1,0 +1,68 @@
+#Bricata API Client: tox.ini
+#Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the Server Side Public License (SSPL) as
+#published by MongoDB, Inc., either version 1 of the
+#License, or (at your option) any later version.
+
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#SSPL for more details.
+
+#The above copyright notice and this permission notice shall be included in all
+#copies or substantial portions of the Software.
+
+#You should have received a copy of the SSPL along with this program.
+#If not, see <https://www.mongodb.com/licensing/server-side-public-license>.
+language: python            # this works for Linux but is an error on macOS or Windows
+
+matrix:
+  include:
+    - name: "Python 3.7.x on Xenial Linux"
+      python: 3.7           # this works for Linux but is ignored on macOS or Windows
+      dist: xenial          # required for Python >= 3.7
+      before_install:
+        - python -m pip install --upgrade pip pipenv
+
+    - name: "Python 3.7.x on macOS"
+      os: osx
+      osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
+      language: shell       # 'language: python' is an error on Travis CI macOS
+      before_install:
+        - python -m pip install --upgrade pip pipenv
+
+    - name: "Python 3.7.x on Windows"
+      os: windows           # Windows 10.0.17134 N/A Build 17134
+      language: shell       # 'language: python' is an error on Travis CI Windows
+      before_install:
+        - choco install python
+        - python -m pip install --upgrade pip pipenv
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+
+install: pipenv install --dev  # all three OSes agree about 'pip3'
+# 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
+# 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
+
+script: pytest
+
+
+
+
+#language: python
+#matrix:
+#  include:
+#    - dist: xenial  # required for Python >= 3.7
+#    - python:
+#        "3.7"
+#        "3.8-dev"
+#
+#install:
+#  - pip install pipenv
+#  - pipenv install --dev
+#
+#script: pytest
+#
+#notifications:
+#  email: false

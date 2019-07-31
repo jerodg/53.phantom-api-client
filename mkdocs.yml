@@ -1,0 +1,49 @@
+copyright: Copyright © 2019. Jerod Gawne
+dev_addr: 0.0.0.0:8080
+google_analytics: null
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.betterem
+  - pymdownx.extra
+  - pymdownx.details
+  - pymdownx.emoji
+  - pymdownx.highlight:
+      linenums: True
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.progressbar
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: True
+  - pymdownx.tasklist
+  - pymdownx.tilde
+  - smarty
+  - toc:
+      permalink: True
+  - footnotes
+nav:
+  - About: 'index.md'
+#  - Location: 'location.md'
+#  - Installation: 'install.md'
+#  - Usage: 'use.md'
+#  - Test: 'test.md'
+plugins:
+  - search:
+      lang: en
+  - macros
+remote_branch: gh-pages
+remote_name: origin
+repo_url: https://github.com/jerodg/base-api-client/tree/gh-pages
+repo_name: GitHub
+site_author: Jerod Gawne
+site_description: Base API Client
+site_name: Base API Client
+site_url: https://jerodg.github.io/base-api-client
+strict: true
+theme:
+  name: material
+#  palette:
+#    primary: 'indigo'
+#    accent: 'green'
