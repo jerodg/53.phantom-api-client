@@ -21,14 +21,15 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import datetime as dt
 from dataclasses import dataclass, field
 from typing import Any, List, Union
+from uuid import uuid4
 
 from base_api_client.models.record import Record
 from phantom_api_client.models.artifact import Artifact
 from phantom_api_client.models.attachment import Attachment
+from phantom_api_client.models.audit import AuditRecord
 from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
-from phantom_api_client.models.audit import AuditRecord
 
 
 @dataclass
@@ -46,7 +47,7 @@ class ContainerRequest(Record):
     label: str = None  # ContainerRequest Classification
     name: str = None  # Short Friendly ContainerRequest Name
     owner_id: Union[int, str, None] = None
-    run_automation: bool = True
+    run_automation: bool = False
     sensitivity: str = 'green'
     severity: str = 'low'
     source_data_identifier: Union[str, None] = None
@@ -55,6 +56,7 @@ class ContainerRequest(Record):
     status: Union[str, None] = 'new'
     tags: Union[str, list, None] = None
     tenant_id: Union[int, None] = None
+    request_id: uuid4 = uuid4()
 
     def __post_init__(self):
         # todo: validate custom fields if status == Closed
@@ -98,18 +100,18 @@ class ContainerRequest(Record):
         if self.status not in status_opts:
             raise InvalidOptionError('status', status_opts)
 
-        if self.artifacts:
-            if type(self.artifacts) is not list:
-                self.artifacts = [self.artifacts]
-            arts = []
-            for a in self.artifacts:
-                if type(a) is Artifact:
-                    arts.append(a.dict())
-                elif type(a) is dict:
-                    arts.append(a)
-            self.artifacts = arts
-        else:
-            self.artifacts = None
+        # if self.artifacts:
+        #     if type(self.artifacts) is not list:
+        #         self.artifacts = [self.artifacts]
+        #     arts = []
+        #     for a in self.artifacts:
+        #         if type(a) is Artifact:
+        #             arts.append(a.dict())
+        #         elif type(a) is dict:
+        #             arts.append(a)
+        #     self.artifacts = arts
+        # else:
+        #     self.artifacts = None
 
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
@@ -173,7 +175,7 @@ class ContainerRecord(Record):
     audit: Union[List[AuditRecord], Any] = field(default_factory=list)
 
     def __post_init__(self):
-        super(ContainerRecord, self).load(self.record)
+        super(ContainerRecord, self).load(**self.record)
 
     # @property
     # def dict(self):
@@ -216,7 +218,7 @@ class ContainerFilter(Record):
         https://my.phantom.us/4.1/docs/rest/query
     """
     page: int = None
-    page_size: int = 1000
+    page_size: int = 100
     pretty: Union[bool, int] = None
     filter: Union[dict, None] = None
     include_expensive: Union[bool, int] = None

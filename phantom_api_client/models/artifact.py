@@ -39,7 +39,7 @@ class Artifact(Record):
     label: Union[str, None] = None
     name: Union[str, None] = None
     owner_id: Union[str, int, None] = None
-    run_automation: bool = True
+    run_automation: bool = False
     severity: Union[str, None] = 'low'
     source_data_identifier: Union[str, None] = None
     start_time: Union[str, None] = None
