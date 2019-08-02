@@ -92,17 +92,15 @@ async def test_get_containers_filtered():
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         f = {'_filter_name__icontains': '"test"'}
         results = await pac.get_containers(ContainerFilter(filter=f))
-        print('results:')
-        print(*results, sep='\n')
 
-        # ids = len(list(set([k['id'] for k in results.success])))
-        # print(f'Results: {len(results.success)} == Ids: {ids}?')
+        ids = len(list(set([k['id'] for k in results.success])))
+        print(f'Results: {len(results.success)} == Ids: {ids}?')
 
-        # assert type(results) is Results
-        # assert len(results.success) >= 1
-        # assert not results.failure
-        # assert len(results.success) == ids  # Ensure no duplicates
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+        assert len(results.success) == ids  # Ensure no duplicates
 
-        # tprint(results, top=5)
+        tprint(results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
