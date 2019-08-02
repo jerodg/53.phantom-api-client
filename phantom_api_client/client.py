@@ -81,7 +81,7 @@ class PhantomApiClient(BaseApiClient):
             limit = filter.limit
             del filter.limit
         else:
-            limit = (await self.get_container_count(filter)).success[0]['container_count']
+            limit = (await self.get_container_count(filter)).success[0]['count']
 
         async with aio.ClientSession(headers=self.header, json_serialize=ujson.dumps) as session:
             logger.debug('Getting containers...')
@@ -95,7 +95,7 @@ class PhantomApiClient(BaseApiClient):
                                                               request_id=uuid4().hex,
                                                               params=filter.dict())))
 
-            results = await asyncio.gather(*tasks)
+            results = Results(data=await asyncio.gather(*tasks))
 
             logger.debug('-> Complete.')
 

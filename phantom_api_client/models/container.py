@@ -18,16 +18,11 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
-import datetime as dt
-from dataclasses import dataclass, field
-from typing import Any, List, Union
+from dataclasses import dataclass
+from typing import Union
 from uuid import uuid4
 
 from base_api_client.models.record import Record
-from phantom_api_client.models.artifact import Artifact
-from phantom_api_client.models.attachment import Attachment
-from phantom_api_client.models.audit import AuditRecord
-from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
 
@@ -117,65 +112,65 @@ class ContainerRequest(Record):
             self.custom_fields = self.custom_fields.dict()
 
 
-@dataclass
-class ContainerRecord(Record):
-    record: dict
-    _pretty_artifact_update_time: Union[str, None] = None
-    _pretty_asset: Union[str, None] = None
-    _pretty_closing_owner: Union[str, None] = None
-    _pretty_create_time: Union[str, None] = None
-    _pretty_current_phase: Union[str, None] = None
-    _pretty_due_time: Union[str, None] = None
-    _pretty_ingest_app: Union[str, None] = None
-    _pretty_owner: Union[str, None] = None
-    _pretty_parent_container: Union[str, None] = None
-    _pretty_past_due: Union[bool, None] = None
-    _pretty_sla_delta: Union[str, None] = None
-    _pretty_start_time: Union[str, None] = None
-    _pretty_tenant: Union[str, None] = None
-    artifact_count: Union[int, None] = None
-    artifact_update_time: Union[str, dt.datetime, None] = None
-    asset: Union[int, None] = None
-    close_time: Union[str, dt.datetime, None] = None
-    closing_owner: Union[int, None] = None
-    closing_rule_run: Union[str, None] = None
-    container_type: Union[str, None] = None  # Default (event) | Case
-    container_update_time: Union[str, dt.datetime, None] = None
-    create_time: Union[str, dt.datetime, None] = None
-    current_phase: Union[str, None] = None
-    custom_fields: Union[dict, None] = None
-    data: Union[dict, None] = None
-    description: Union[str, dt.datetime, None] = None
-    due_time: Union[str, dt.datetime, None] = None
-    end_time: Union[str, dt.datetime, None] = None
-    hash: Union[str, None] = None
-    id: Union[int, None] = None
-    in_case: Union[bool, None] = None
-    ingest_app: Union[str, None] = None
-    kill_chain: Union[str, None] = None
-    label: Union[str, None] = None
-    name: Union[str, None] = None
-    node_guid: Union[str, None] = None
-    open_time: Union[str, dt.datetime, None] = None
-    owner: Union[int, None] = None
-    owner_name: Union[str, None] = None
-    parent_container: Union[int, None] = None
-    sensitivity: Union[str, None] = None
-    severity: Union[str, None] = None
-    source_data_identifier: Union[str, None] = None
-    start_time: Union[str, dt.datetime, None] = None
-    status: Union[str, None] = None
-    tags: Union[List[str], None] = field(default_factory=list)
-    tenant: Union[int, None] = None
-    version: Union[int, None] = None
-    # Extras
-    attachments: Union[List[Attachment], Any] = field(default_factory=list)
-    comments: Union[List[Comment], Any] = field(default_factory=list)
-    artifacts: Union[List[Artifact], Any] = field(default_factory=list)
-    audit: Union[List[AuditRecord], Any] = field(default_factory=list)
-
-    def __post_init__(self):
-        super(ContainerRecord, self).load(**self.record)
+# @dataclass
+# class ContainerRecord(Record):
+#     record: dict
+#     _pretty_artifact_update_time: Union[str, None] = None
+#     _pretty_asset: Union[str, None] = None
+#     _pretty_closing_owner: Union[str, None] = None
+#     _pretty_create_time: Union[str, None] = None
+#     _pretty_current_phase: Union[str, None] = None
+#     _pretty_due_time: Union[str, None] = None
+#     _pretty_ingest_app: Union[str, None] = None
+#     _pretty_owner: Union[str, None] = None
+#     _pretty_parent_container: Union[str, None] = None
+#     _pretty_past_due: Union[bool, None] = None
+#     _pretty_sla_delta: Union[str, None] = None
+#     _pretty_start_time: Union[str, None] = None
+#     _pretty_tenant: Union[str, None] = None
+#     artifact_count: Union[int, None] = None
+#     artifact_update_time: Union[str, dt.datetime, None] = None
+#     asset: Union[int, None] = None
+#     close_time: Union[str, dt.datetime, None] = None
+#     closing_owner: Union[int, None] = None
+#     closing_rule_run: Union[str, None] = None
+#     container_type: Union[str, None] = None  # Default (event) | Case
+#     container_update_time: Union[str, dt.datetime, None] = None
+#     create_time: Union[str, dt.datetime, None] = None
+#     current_phase: Union[str, None] = None
+#     custom_fields: Union[dict, None] = None
+#     data: Union[dict, None] = None
+#     description: Union[str, dt.datetime, None] = None
+#     due_time: Union[str, dt.datetime, None] = None
+#     end_time: Union[str, dt.datetime, None] = None
+#     hash: Union[str, None] = None
+#     id: Union[int, None] = None
+#     in_case: Union[bool, None] = None
+#     ingest_app: Union[str, None] = None
+#     kill_chain: Union[str, None] = None
+#     label: Union[str, None] = None
+#     name: Union[str, None] = None
+#     node_guid: Union[str, None] = None
+#     open_time: Union[str, dt.datetime, None] = None
+#     owner: Union[int, None] = None
+#     owner_name: Union[str, None] = None
+#     parent_container: Union[int, None] = None
+#     sensitivity: Union[str, None] = None
+#     severity: Union[str, None] = None
+#     source_data_identifier: Union[str, None] = None
+#     start_time: Union[str, dt.datetime, None] = None
+#     status: Union[str, None] = None
+#     tags: Union[List[str], None] = field(default_factory=list)
+#     tenant: Union[int, None] = None
+#     version: Union[int, None] = None
+#     # Extras
+#     attachments: Union[List[Attachment], Any] = field(default_factory=list)
+#     comments: Union[List[Comment], Any] = field(default_factory=list)
+#     artifacts: Union[List[Artifact], Any] = field(default_factory=list)
+#     audit: Union[List[AuditRecord], Any] = field(default_factory=list)
+#
+#     def __post_init__(self):
+#         super(ContainerRecord, self).load(**self.record)
 
     # @property
     # def dict(self):
