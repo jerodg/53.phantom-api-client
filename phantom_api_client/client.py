@@ -27,7 +27,7 @@ import aiohttp as aio
 import ujson
 
 from base_api_client import BaseApiClient, Results
-from phantom_api_client.models import ContainerFilter, ContainerRequest
+from phantom_api_client.models import ArtifactRequest, ContainerFilter, ContainerRequest
 
 logger = logging.getLogger(__name__)
 
@@ -103,23 +103,86 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results, 'data')
 
-    async def create_containers(self, containers: Union[List[ContainerRequest], ContainerRequest]) -> Results:
+    async def create_artifacts(self, artifacts: Union[
+        List[ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]) -> Results:
+        if type(artifacts) is not list:
+            artifacts = [artifacts]
 
         async with aio.ClientSession(headers=self.header, json_serialize=ujson.dumps) as session:
-            logger.debug('Creating container(s)...')
+            logger.debug('Creating artifacts(s)...')
+            if type(artifacts[0]) is ArtifactRequest:
+                tasks = [asyncio.create_task(self.request(method='post',
+                                                          end_point='/artifact',
+                                                          session=session,
+                                                          request_id=uuid4().hex,
+                                                          json=a.dict())) for a in artifacts]
+            else:
+                tasks = [asyncio.create_task(self.request(method='post',
+                                                          end_point='/artifact',
+                                                          session=session,
+                                                          request_id=uuid4().hex,
+                                                          json=a.dict())) for a in artifacts.artifacts]
 
+            artifact_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
+            logger.debug('-> Complete.')
+            await session.close()
+
+            return await self.process_results(Results(data=await asyncio.gather(*tasks)))
+
+    async def create_containers(self, containers: Union[List[ContainerRequest], ContainerRequest],
+                                revert_failure: bool = False) -> Results:
+        # todo: handle revert_failure
+        if type(containers) is not list:
+            containers = [containers]
+
+        # print('containers:', containers)
+        # print('container0:', containers[0])
+        async with aio.ClientSession(headers=self.header, json_serialize=ujson.dumps) as session:
+            # Create Containers
+            logger.debug('Creating container(s)...')
             tasks = [asyncio.create_task(self.request(method='post',
                                                       end_point='/container',
                                                       session=session,
+                                                      request_id=c.request_id,
                                                       json=c.dict())) for c in containers]
 
-            results = await asyncio.gather(*tasks)
-
+            # print('results1:', results)
+            container_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
+            # print('results2:', results)
             logger.debug('-> Complete.')
+
+            # Populate container_id(s)
+            [c.update_id(next((_['id'] for _ in container_results.success if _['request_id'] == c.request_id), None))
+             for c in containers]
+
+            # Create Comments
+
+            # Create Attachments
+
+            # Create Artifacts
+            # print('containers1:', containers)
+            # artifacts = []
+            # for container in containers:
+            #     # print('container1:', container)
+            #     if container.artifacts:
+            #         for artifact in container.artifacts:
+            #             cid = next((item['id'] for item in container_results.success if item['request_id'] == container.request_id),
+            #                        None)
+            #             print('cid:', cid)
+            #             if cid:
+            #                 artifact.container_id = cid
+            #                 artifacts.append(artifact)
+            #             else:
+            #                 logger.error(f'No matching request_id: {container.request_id}, found.')
+            #         artifacts[-1].run_automation = True
+            #
+            # print('artifacts:', artifacts)
+            # artifact_results = await self.create_artifacts(artifacts)
 
         await session.close()
 
-        return await self.process_results(results, 'data')
+        return container_results
+        # return await self.process_results(results, 'data')
 
 
 if __name__ == '__main__':

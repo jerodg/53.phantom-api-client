@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Phantom API Client: Models.Artifact
+"""Phantom API Client: Models.ArtifactRequest
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -27,10 +27,10 @@ from phantom_api_client.models.exceptions import InvalidOptionError
 
 
 @dataclass
-class Artifact(Record):
-    container_id: Union[int, None] = None
+class ArtifactRequest(Record):
     cef: Union[Cef, None] = None  # Common Event Format
     cef_types: Union[Dict[str, List[str]], None] = None
+    container_id: Union[int, None] = None
     data: Union[dict, None] = None
     description: Union[str, None] = None
     end_time: Union[str, None] = None  # ISO-8601 Timestamp
@@ -71,11 +71,3 @@ class Artifact(Record):
 
         if type(self.cef) is Cef:
             self.cef = self.cef.dict
-
-    @property
-    def dict(self):
-        return dict(sorted({k: v for k, v in self.__dict__.items() if v is not None}.items()))
-
-    def struct(self, **entries):
-        """This will take a record and return an object."""
-        self.__dict__.update(entries)
