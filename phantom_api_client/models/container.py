@@ -18,11 +18,16 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
-from dataclasses import dataclass
-from typing import Union
+import datetime as dt
+from dataclasses import dataclass, field
+from typing import Any, List, Union
 from uuid import uuid4
 
 from base_api_client.models.record import Record
+from phantom_api_client.models.artifact import ArtifactRequest
+from phantom_api_client.models.attachment import Attachment
+from phantom_api_client.models.audit import AuditRecord
+from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
 
@@ -51,7 +56,12 @@ class ContainerRequest(Record):
     status: Union[str, None] = 'new'
     tags: Union[str, list, None] = None
     tenant_id: Union[int, None] = None
-    request_id: uuid4 = uuid4()
+    # Below are not part of the json object but used in the helper function
+    request_id: str = uuid4().hex
+    id: int = None
+    artifacts: List[ArtifactRequest] = field(default_factory=list)
+    comments: List[Comment] = field(default_factory=list)
+    attachments: List[Attachment] = field(default_factory=list)
 
     def __post_init__(self):
         # todo: validate custom fields if status == Closed
@@ -95,105 +105,140 @@ class ContainerRequest(Record):
         if self.status not in status_opts:
             raise InvalidOptionError('status', status_opts)
 
-        # if self.artifacts:
-        #     if type(self.artifacts) is not list:
-        #         self.artifacts = [self.artifacts]
-        #     arts = []
-        #     for a in self.artifacts:
-        #         if type(a) is Artifact:
-        #             arts.append(a.dict())
-        #         elif type(a) is dict:
-        #             arts.append(a)
-        #     self.artifacts = arts
-        # else:
-        #     self.artifacts = None
-
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
+    def update_id(self, id: int):
+        self.id = id
 
-# @dataclass
-# class ContainerRecord(Record):
-#     record: dict
-#     _pretty_artifact_update_time: Union[str, None] = None
-#     _pretty_asset: Union[str, None] = None
-#     _pretty_closing_owner: Union[str, None] = None
-#     _pretty_create_time: Union[str, None] = None
-#     _pretty_current_phase: Union[str, None] = None
-#     _pretty_due_time: Union[str, None] = None
-#     _pretty_ingest_app: Union[str, None] = None
-#     _pretty_owner: Union[str, None] = None
-#     _pretty_parent_container: Union[str, None] = None
-#     _pretty_past_due: Union[bool, None] = None
-#     _pretty_sla_delta: Union[str, None] = None
-#     _pretty_start_time: Union[str, None] = None
-#     _pretty_tenant: Union[str, None] = None
-#     artifact_count: Union[int, None] = None
-#     artifact_update_time: Union[str, dt.datetime, None] = None
-#     asset: Union[int, None] = None
-#     close_time: Union[str, dt.datetime, None] = None
-#     closing_owner: Union[int, None] = None
-#     closing_rule_run: Union[str, None] = None
-#     container_type: Union[str, None] = None  # Default (event) | Case
-#     container_update_time: Union[str, dt.datetime, None] = None
-#     create_time: Union[str, dt.datetime, None] = None
-#     current_phase: Union[str, None] = None
-#     custom_fields: Union[dict, None] = None
-#     data: Union[dict, None] = None
-#     description: Union[str, dt.datetime, None] = None
-#     due_time: Union[str, dt.datetime, None] = None
-#     end_time: Union[str, dt.datetime, None] = None
-#     hash: Union[str, None] = None
-#     id: Union[int, None] = None
-#     in_case: Union[bool, None] = None
-#     ingest_app: Union[str, None] = None
-#     kill_chain: Union[str, None] = None
-#     label: Union[str, None] = None
-#     name: Union[str, None] = None
-#     node_guid: Union[str, None] = None
-#     open_time: Union[str, dt.datetime, None] = None
-#     owner: Union[int, None] = None
-#     owner_name: Union[str, None] = None
-#     parent_container: Union[int, None] = None
-#     sensitivity: Union[str, None] = None
-#     severity: Union[str, None] = None
-#     source_data_identifier: Union[str, None] = None
-#     start_time: Union[str, dt.datetime, None] = None
-#     status: Union[str, None] = None
-#     tags: Union[List[str], None] = field(default_factory=list)
-#     tenant: Union[int, None] = None
-#     version: Union[int, None] = None
-#     # Extras
-#     attachments: Union[List[Attachment], Any] = field(default_factory=list)
-#     comments: Union[List[Comment], Any] = field(default_factory=list)
-#     artifacts: Union[List[Artifact], Any] = field(default_factory=list)
-#     audit: Union[List[AuditRecord], Any] = field(default_factory=list)
-#
-#     def __post_init__(self):
-#         super(ContainerRecord, self).load(**self.record)
+        if self.artifacts:
+            for artifact in self.artifacts:
+                artifact.container_id = self.id
 
-    # @property
-    # def dict(self):
-    #     d = self.__dict__
-    #     del d['attachments']
-    #     del d['artifacts']
-    #
-    #     return super(ContainerRequest, self).dict(d)
+        if self.comments:
+            for comment in self.comments:
+                comment.container_id = self.id
 
-    # @property
-    # def record(self):
-    #     d = self.__dict__
-    #     if type(d['attachments'][0]) is Attachment:
-    #         d['attachments'] = [a.dict for a in self.attachments]
-    #
-    #     if type(d['artifacts'][0]) is Artifact:
-    #         d['artifacts'] = [a.dict for a in self.artifacts]
-    #
-    #     return {k: v for k, v in d.items() if v is not None}
-    #
-    # def struct(self, **entries):
-    #     """This will take a record and return an object."""
-    #     self.__dict__.update(entries)
+        if self.attachments:
+            for attachment in self.attachments:
+                attachment.container_id = self.id
+
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        del d['request_id']
+        del d['id']
+        del d['artifacts']
+        del d['comments']
+        del d['attachments']
+
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
+
+
+@dataclass
+class ContainerRecord(Record):
+    record: dict
+    _pretty_artifact_update_time: Union[str, None] = None
+    _pretty_asset: Union[str, None] = None
+    _pretty_closing_owner: Union[str, None] = None
+    _pretty_create_time: Union[str, None] = None
+    _pretty_current_phase: Union[str, None] = None
+    _pretty_due_time: Union[str, None] = None
+    _pretty_ingest_app: Union[str, None] = None
+    _pretty_owner: Union[str, None] = None
+    _pretty_parent_container: Union[str, None] = None
+    _pretty_past_due: Union[bool, None] = None
+    _pretty_sla_delta: Union[str, None] = None
+    _pretty_start_time: Union[str, None] = None
+    _pretty_tenant: Union[str, None] = None
+    artifact_count: Union[int, None] = None
+    artifact_update_time: Union[str, dt.datetime, None] = None
+    asset: Union[int, None] = None
+    close_time: Union[str, dt.datetime, None] = None
+    closing_owner: Union[int, None] = None
+    closing_rule_run: Union[str, None] = None
+    container_type: Union[str, None] = None  # Default (event) | Case
+    container_update_time: Union[str, dt.datetime, None] = None
+    create_time: Union[str, dt.datetime, None] = None
+    current_phase: Union[str, None] = None
+    custom_fields: Union[dict, None] = None
+    data: Union[dict, None] = None
+    description: Union[str, dt.datetime, None] = None
+    due_time: Union[str, dt.datetime, None] = None
+    end_time: Union[str, dt.datetime, None] = None
+    hash: Union[str, None] = None
+    id: Union[int, None] = None
+    in_case: Union[bool, None] = None
+    ingest_app: Union[str, None] = None
+    kill_chain: Union[str, None] = None
+    label: Union[str, None] = None
+    name: Union[str, None] = None
+    node_guid: Union[str, None] = None
+    open_time: Union[str, dt.datetime, None] = None
+    owner: Union[int, None] = None
+    owner_name: Union[str, None] = None
+    parent_container: Union[int, None] = None
+    sensitivity: Union[str, None] = None
+    severity: Union[str, None] = None
+    source_data_identifier: Union[str, None] = None
+    start_time: Union[str, dt.datetime, None] = None
+    status: Union[str, None] = None
+    tags: Union[List[str], None] = field(default_factory=list)
+    tenant: Union[int, None] = None
+    version: Union[int, None] = None
+    # Extras
+    request_id: str = None
+    artifacts: Union[List[ArtifactRequest], Any] = field(default_factory=list)
+    attachments: Union[List[Attachment], Any] = field(default_factory=list)
+    audit_log: Union[List[AuditRecord], Any] = field(default_factory=list)
+    comments: Union[List[Comment], Any] = field(default_factory=list)
+
+    def __post_init__(self):
+        super(ContainerRecord, self).load(**self.record)
+
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        del d['request_id']
+        del d['id']
+        del d['artifacts']
+        del d['comments']
+        del d['attachments']
+
+        if type(d['attachments'][0]) is Attachment:
+            d['attachments'] = [a.dict for a in self.attachments]
+
+        if type(d['artifacts'][0]) is ArtifactRequest:
+            d['artifacts'] = [a.dict for a in self.artifacts]
+
+        if cleanup:
+            del self.record
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
 
 
 @dataclass
