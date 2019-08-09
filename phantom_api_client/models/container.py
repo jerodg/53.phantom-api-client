@@ -64,6 +64,7 @@ class ContainerRequest(Record):
     attachments: List[Attachment] = field(default_factory=list)
 
     def __post_init__(self):
+        print('post_artifacts:', self.artifacts)
         # todo: validate custom fields if status == Closed
         label_opts = ['53investigation-mailbox',
                       'crowdstrike-alerts',
@@ -208,6 +209,7 @@ class ContainerRecord(Record):
 
     def __post_init__(self):
         super(ContainerRecord, self).load(**self.record)
+        print('post_artifacts:', self.artifacts)
 
     def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
         """
@@ -225,11 +227,11 @@ class ContainerRecord(Record):
         del d['comments']
         del d['attachments']
 
-        if type(d['attachments'][0]) is Attachment:
-            d['attachments'] = [a.dict for a in self.attachments]
-
-        if type(d['artifacts'][0]) is ArtifactRequest:
-            d['artifacts'] = [a.dict for a in self.artifacts]
+        # if type(d['attachments'][0]) is Attachment:
+        #     d['attachments'] = [a.dict for a in self.attachments]
+        #
+        # if type(d['artifacts'][0]) is ArtifactRequest:
+        #     d['artifacts'] = [a.dict for a in self.artifacts]
 
         if cleanup:
             del self.record
@@ -239,43 +241,3 @@ class ContainerRecord(Record):
             d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
 
         return d
-
-
-@dataclass
-class ContainerFilter(Record):
-    """
-    Attributes:
-        type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node
-        page (int): page number to retrieve
-        page_size (int): how many results per page
-        pretty (bool): pretty format results
-        filter (dict): {'_filter_name__icontains': 'test'}
-        include_expensive (bool): return all fields
-        sort (str): field_name to sort on
-        order (str): asc|desc
-
-    References:
-        https://my.phantom.us/4.1/docs/rest/query
-    """
-    page: int = None
-    page_size: int = 100
-    pretty: Union[bool, int] = None
-    filter: Union[dict, None] = None
-    include_expensive: Union[bool, int] = None
-    sort: str = None
-    order: str = None
-    limit: int = None
-
-    def __post_init__(self):
-        if self.include_expensive or self.pretty:
-            self.page_size = 100
-
-        if self.pretty:
-            self.pretty = 1
-
-        if self.include_expensive:
-            self.include_expensive = 1
-
-        if self.filter:
-            self.load(**self.filter)
-            del self.filter
