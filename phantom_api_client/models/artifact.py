@@ -20,6 +20,7 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from dataclasses import dataclass
 from typing import Dict, List, Union
+from uuid import uuid4
 
 from base_api_client.models.record import Record
 from phantom_api_client.models.cef import Cef
@@ -45,6 +46,9 @@ class ArtifactRequest(Record):
     start_time: Union[str, None] = None
     tags: Union[List[str], str, None] = None
     type: Union[str, None] = None
+    # Extras
+    request_id: str = uuid4().hex
+    id: int = None
 
     def __post_init__(self):
         kill_chain_opts = ['Reconnaissance',
@@ -71,3 +75,7 @@ class ArtifactRequest(Record):
 
         if type(self.cef) is Cef:
             self.cef = self.cef.dict
+
+    def update_id(self, id: int):
+        print('update_id:', id)
+        self.id = id
