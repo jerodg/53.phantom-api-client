@@ -25,7 +25,7 @@ from os import getenv
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import ArtifactRequest, Cef, ContainerFilter, ContainerRequest
+from phantom_api_client.models import ArtifactRequest, Cef, ContainerRequest, RequestFilter
 
 
 @pytest.mark.asyncio
@@ -36,6 +36,24 @@ async def test_get_container_count():
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_container_count()
         # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_container_count_filtered():
+    ts = time.perf_counter()
+
+    bprint('Test: Get ContainerRequest Count')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        f = {'_filter_name__icontains': '"test"'}
+        results = await pac.get_container_count(RequestFilter(filter=f))
 
         assert type(results) is Results
         assert len(results.success) >= 1
@@ -68,31 +86,13 @@ async def test_get_containers():
 
 
 @pytest.mark.asyncio
-async def test_get_container_count_filtered():
-    ts = time.perf_counter()
-
-    bprint('Test: Get ContainerRequest Count')
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        f = {'_filter_name__icontains': '"test"'}
-        results = await pac.get_container_count(ContainerFilter(filter=f))
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
 async def test_get_containers_filtered():
     ts = time.perf_counter()
 
-    bprint('Test: Get Containers')
+    bprint('Test: Get Containers Filtered')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        f = {'_filter_name__icontains': '"test"'}
-        results = await pac.get_containers(ContainerFilter(filter=f))
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        results = await pac.get_containers(filter=RequestFilter(filter=f))
 
         ids = len(list(set([k['id'] for k in results.success])))
         print(f'Results: {len(results.success)} == Ids: {ids}?')
@@ -295,7 +295,7 @@ async def test_create_container_with_artifact():
                                      tags=['test'],
                                      tenant_id=2,
                                      artifacts=artifacts)
-        print('container:', container)
+        print('containerT:', container)
 
         results = await pac.create_containers(containers=container)
 
