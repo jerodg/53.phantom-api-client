@@ -5,8 +5,8 @@
 |_| |_||_\__,_|_||_\__\___/_|_|_| /_/ \_\_| |___|  \___|_|_\___|_||_\__|
 ```
 
-![platform](https://img.shields.io/badge/Platform-Linux/Unix/Windows-blue.svg)
-![python](https://img.shields.io/badge/Python-3.6/7/8%2B-blue.svg)
+![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
+![python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
 ![phantom](https://img.shields.io/badge/Phantom-4.2+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
 ![0%](https://img.shields.io/badge/Coverage-0%25-red.svg)
