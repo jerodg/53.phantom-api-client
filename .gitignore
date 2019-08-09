@@ -196,4 +196,4 @@ dmypy.json
 
 # MkDocs
 site/
-/base_api_client/
+base_api_client/

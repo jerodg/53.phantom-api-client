@@ -21,35 +21,30 @@ import time
 
 import pytest
 from os import getenv
-from os.path import realpath
 
-from base_api_client import bprint
+from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerFilter
 
 
 # todo: write delete function 😅
 @pytest.mark.asyncio
-async def delete_test_containers():
+async def test_get_containers_filtered():
     ts = time.perf_counter()
-    bprint('Test: Get Containers Performance Analysis')
-    # Semaphore, PageSize
-    semaphores = range(1, 100, 5)
-    page_sizes = range(1, 100, 10)
-    stats = []
 
-    for semaphore in semaphores:
-        for page_size in range(1, 100, 10):
-            async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml', sem=semaphore) as pac:
-                tts = time.perf_counter()
-                results = await pac.get_containers(ContainerFilter(page_size=page_size))
-                recs = len(results.success)
-                dur = time.perf_counter() - tts
-                stat = f'| {semaphore}\t| {page_size}\t| {recs}\t| {dur:f}\t| {recs / dur:f}\t|'
-                stats.append(stat)
-                print(stat)
+    bprint('Test: Get Containers')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        results = await pac.get_containers(ContainerFilter(filter=f))
 
-    with open(realpath('./data/get_containers_stats_2019-07-30.txt')) as sfile:
-        sfile.writelines(stats)
+        ids = len(list(set([k['id'] for k in results.success])))
+        print(f'Results: {len(results.success)} == Ids: {ids}?')
 
-    bprint(f'-> Completed in {(time.perf_counter() - ts) / 60:f} minutes.')
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+        assert len(results.success) == ids  # Ensure no duplicates
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
