@@ -19,5 +19,12 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from phantom_api_client.client import PhantomApiClient
+from phantom_api_client.models import *
 
-___all___ = ['PhantomApiClient']
+# ___all___ = [PhantomApiClient,
+#              ArtifactRequest,
+#              Attachment,
+#              Cef,
+#              Comment,
+#              ContainerRequest,
+#              ]

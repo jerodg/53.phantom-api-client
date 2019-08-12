@@ -60,8 +60,11 @@ class ContainerRequest(Record):
     request_id: str = uuid4().hex
     id: int = None
     artifacts: List[ArtifactRequest] = field(default_factory=list)
-    comments: List[Comment] = field(default_factory=list)
-    attachments: List[Attachment] = field(default_factory=list)
+
+    # todo: implement
+    # comments: List[Comment] = field(default_factory=list)
+    # attachments: List[Attachment] = field(default_factory=list)
+    # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
         print('post_artifacts:', self.artifacts)
@@ -109,6 +112,9 @@ class ContainerRequest(Record):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
+    def update_request_id(self):
+        self.request_id = uuid4().hex
+
     def update_id(self, id: int):
         self.id = id
 
@@ -116,13 +122,14 @@ class ContainerRequest(Record):
             for artifact in self.artifacts:
                 artifact.container_id = self.id
 
-        if self.comments:
-            for comment in self.comments:
-                comment.container_id = self.id
-
-        if self.attachments:
-            for attachment in self.attachments:
-                attachment.container_id = self.id
+        3  # todo: implement
+        # if self.comments:
+        #     for comment in self.comments:
+        #         comment.container_id = self.id
+        #
+        # if self.attachments:
+        #     for attachment in self.attachments:
+        #         attachment.container_id = self.id
 
     def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
         """
@@ -134,11 +141,13 @@ class ContainerRequest(Record):
         Returns:
             d (dict):"""
         d = {**self.__dict__}
-        del d['request_id']
-        del d['id']
+        # del d['request_id']
+        # del d['id']
         del d['artifacts']
-        del d['comments']
-        del d['attachments']
+        # todo: implement
+        # del d['comments']
+        # del d['attachments']
+        # del d['audit']
 
         if cleanup:
             d = {k: v for k, v in d.items() if v is not None}
