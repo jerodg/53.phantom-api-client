@@ -132,22 +132,23 @@ class PhantomApiClient(BaseApiClient):
             artifacts = [artifacts]
 
         # todo: handle failure (already exists?)
-        print('artifacts:', artifacts, type(artifacts))
-        print(artifacts[0].artifacts)
+        # print('artifacts:', artifacts, type(artifacts))
+        # print(artifacts[0].artifacts)
         async with aio.ClientSession(headers=self.header, json_serialize=ujson.dumps) as session:
             logger.debug('Creating artifacts(s)...')
 
             # We set the last artifact of the last container to run automation.
             # This will run automation on all newly created objects.
-            artifacts[-1].artifacts[-1].run_automation = True
 
             if type(artifacts[0]) is ContainerRequest:
+                artifacts[-1].artifacts[-1].run_automation = True
                 tasks = [asyncio.create_task(self.request(method='post',
                                                           end_point='/artifact',
                                                           session=session,
                                                           request_id=a.request_id,
                                                           json=a.dict())) for x in artifacts for a in x.artifacts]
             else:
+                artifacts[-1].run_automation = True
                 tasks = [asyncio.create_task(self.request(method='post',
                                                           end_point='/artifact',
                                                           session=session,
@@ -156,11 +157,11 @@ class PhantomApiClient(BaseApiClient):
 
             results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
             # results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
-            print('artifact_results1:', results)
+            # print('artifact_results1:', results)
 
             # Populate artifact id(s)
-            # [a.update_id(next((_['id'] for _ in results.success if _['request_id'] == a.request_id), None))
-            #  for x in artifacts for a in x.artifacts]
+            [a.update_id(next((_['id'] for _ in results.success if _['request_id'] == a.request_id), None))
+             for x in artifacts for a in x.artifacts]
             # print('artifact_results2:', results)
             logger.debug('-> Complete.')
 
@@ -171,7 +172,7 @@ class PhantomApiClient(BaseApiClient):
             if not type(artifacts[0]) is ContainerRequest:  # If ArtifactRequest
                 await session.close()
 
-            return results
+            return results, artifacts
 
             # return results
             # return artifacts
@@ -185,7 +186,7 @@ class PhantomApiClient(BaseApiClient):
         if type(containers) is not list:
             containers = [containers]
 
-        print('containers0:', containers)
+        # print('containers0:', containers)
         # print('container0:', containers[0])
         async with aio.ClientSession(headers=self.header, json_serialize=ujson.dumps) as session:
             # Create Containers
@@ -199,7 +200,7 @@ class PhantomApiClient(BaseApiClient):
             # print('results1:', results)
             # results = Results()
             container_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
-            print('container_results1:', container_results)
+            # print('container_results1:', container_results)
             logger.debug('-> Complete.')
 
             # Populate container_id(s)
@@ -214,9 +215,9 @@ class PhantomApiClient(BaseApiClient):
             # Create Attachments
 
             # Create Artifacts
-            print('containers1:', containers)
-            artifact_results = await self.create_artifacts(containers)
-            print('artifact_reulst3:', artifact_results)
+            # print('containers1:', containers)
+            artifact_results, containers = await self.create_artifacts(containers)
+            # print('artifact_reulst3:', artifact_results)
 
         await session.close()
 
@@ -229,8 +230,9 @@ class PhantomApiClient(BaseApiClient):
         container_results.failure.extend(artifact_results.failure)
 
         container_results.cleanup()
-        return container_results
+        return container_results, containers
         # return await self.process_results(results, 'data')
+        # return containers
 
 
 if __name__ == '__main__':

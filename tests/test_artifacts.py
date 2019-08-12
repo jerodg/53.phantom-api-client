@@ -125,6 +125,7 @@ async def test_create_artifact():
 
         ids = list(set([k['id'] for k in results.success]))
         id = choice(ids)
+        print('Adding artifact to container:', id)
 
         uid = uuid4().hex
         artifacts = [ArtifactRequest(cef=Cef(),
@@ -144,7 +145,7 @@ async def test_create_artifact():
                                      start_time=None,
                                      tags=['test'],
                                      type='test')]
-        results = await pac.create_artifacts()
+        results = await pac.create_artifacts(artifacts)
 
         assert type(results) is Results
         assert len(results.success) >= 1
