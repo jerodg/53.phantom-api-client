@@ -33,13 +33,18 @@ from phantom_api_client.models import ArtifactRequest, Cef, RequestFilter
 async def test_get_artifact_count():
     # This needs test containers/artifacts created; see test_containers.py
     ts = time.perf_counter()
-
     bprint('Test: Get Artifact Count')
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        # todo: get random test container with > 1 artifact or run test create
-        # results = await pac.get_containers()
 
-        results = await pac.get_artifact_count(container_id=114871)
+    # todo: finish autogather container when get_artifacts() written
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        # results = await pac.get_containers(filter=RequestFilter(filter=f))
+        # ids = len(list(set([k['id'] for k in results.success])))
+        #
+        # for id in ids:
+        #     results = await pac.get_container()
+
+        results = await pac.get_artifact_count(container_id=115228)
         # print(results)
 
         assert type(results) is Results
@@ -53,7 +58,7 @@ async def test_get_artifact_count():
 
 # todo: test
 @pytest.mark.asyncio
-async def test_get_container_count_filtered():
+async def test_get_artifact_count_filtered():
     ts = time.perf_counter()
 
     bprint('Test: Get ContainerRequest Count')

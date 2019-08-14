@@ -67,7 +67,6 @@ class ContainerRequest(Record):
     # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
-        print('post_artifacts:', self.artifacts)
         # todo: validate custom fields if status == Closed
         label_opts = ['53investigation-mailbox',
                       'crowdstrike-alerts',

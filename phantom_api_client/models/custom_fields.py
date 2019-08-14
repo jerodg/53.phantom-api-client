@@ -110,7 +110,6 @@ class CustomFields:
         if self.customer_exposure not in customer_exposure_opts:
             raise InvalidOptionError('customer_exposure', customer_exposure_opts)
 
-    @property
     def dict(self):
         d = {'Alert Source':         self.alert_source,
              'Resolution Summary':   self.resolution_summary,
