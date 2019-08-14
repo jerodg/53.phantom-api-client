@@ -18,7 +18,6 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
-from typing import List
 from uuid import uuid4
 
 import pytest
@@ -205,14 +204,15 @@ async def test_create_containers():
                                        tags=['test'],
                                        tenant_id=2)]
 
-        results = await pac.create_containers(containers=containers)
+        response_results, request_results = await pac.create_containers(containers=containers)
 
         # todo: add auto-check for container creation
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
+        assert type(response_results) is Results
+        assert len(request_results) == 2
+        assert len(response_results.success) == 2
+        assert not response_results.failure
 
-        tprint(results, top=5)
+        tprint(response_results, request_results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -296,19 +296,16 @@ async def test_create_container_with_artifact():
                                      tags=['test'],
                                      tenant_id=2,
                                      artifacts=artifacts)
-        print('containerT:', container)
 
         response_results, request_results = await pac.create_containers(containers=container)
 
         # todo: add auto-check for container creation
         assert type(response_results) is Results
-        assert type(request_results) is List[ContainerRequest]
-        assert len(request_results) >= 1
-        assert len(response_results.success) >= 1
+        assert len(request_results) == 1
+        assert len(response_results.success) == 2
         assert not response_results.failure
 
-        tprint(response_results, top=5)
-        print(*request_results, sep='\n')
+        tprint(response_results, request_results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 

@@ -5,10 +5,10 @@
       <paths name="aims-prod: phantom-api-client">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/infosecintegration/sea/phantom-api-client" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/pycharm_project_738" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
-            <excludedPath path="/home/infosecintegration/sea/phantom-api-client/.venv" />
+            <excludedPath path="/opt/sea/phantom-api-client/.venv" />
             <excludedPath local="true" path="$PROJECT_DIR$/.idea" />
           </excludedPaths>
         </serverdata>
