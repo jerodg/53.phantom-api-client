@@ -18,23 +18,24 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
-from phantom_api_client.models.artifact import Artifact
+from phantom_api_client.models.artifact import ArtifactRequest
 from phantom_api_client.models.attachment import Attachment
 from phantom_api_client.models.cef import Cef
 from phantom_api_client.models.comment import Comment
-from phantom_api_client.models.container import ContainerFilter, ContainerRequest
+from phantom_api_client.models.container import ContainerRequest
 from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
+from phantom_api_client.models.filter import RequestFilter
 from phantom_api_client.models.note import Note
 from phantom_api_client.models.pin import Pin
 
 __all__ = ['InvalidOptionError',
            'ContainerRequest',
-           'Artifact',
+           'ArtifactRequest',
            'Cef',
            'Comment',
            'CustomFields',
            'Note',
            'Pin',
            'Attachment',
-           'ContainerFilter']
+           'RequestFilter']

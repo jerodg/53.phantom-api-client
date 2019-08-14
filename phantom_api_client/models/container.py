@@ -21,14 +21,15 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import datetime as dt
 from dataclasses import dataclass, field
 from typing import Any, List, Union
+from uuid import uuid4
 
 from base_api_client.models.record import Record
-from phantom_api_client.models.artifact import Artifact
+from phantom_api_client.models.artifact import ArtifactRequest
 from phantom_api_client.models.attachment import Attachment
+from phantom_api_client.models.audit import AuditRecord
 from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
-from phantom_api_client.models.audit import AuditRecord
 
 
 @dataclass
@@ -46,7 +47,7 @@ class ContainerRequest(Record):
     label: str = None  # ContainerRequest Classification
     name: str = None  # Short Friendly ContainerRequest Name
     owner_id: Union[int, str, None] = None
-    run_automation: bool = True
+    run_automation: bool = False
     sensitivity: str = 'green'
     severity: str = 'low'
     source_data_identifier: Union[str, None] = None
@@ -55,6 +56,15 @@ class ContainerRequest(Record):
     status: Union[str, None] = 'new'
     tags: Union[str, list, None] = None
     tenant_id: Union[int, None] = None
+    # Below are not part of the json object but used in the helper function
+    request_id: str = uuid4().hex
+    id: int = None
+    artifacts: List[ArtifactRequest] = field(default_factory=list)
+
+    # todo: implement
+    # comments: List[Comment] = field(default_factory=list)
+    # attachments: List[Attachment] = field(default_factory=list)
+    # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
         # todo: validate custom fields if status == Closed
@@ -98,21 +108,53 @@ class ContainerRequest(Record):
         if self.status not in status_opts:
             raise InvalidOptionError('status', status_opts)
 
-        if self.artifacts:
-            if type(self.artifacts) is not list:
-                self.artifacts = [self.artifacts]
-            arts = []
-            for a in self.artifacts:
-                if type(a) is Artifact:
-                    arts.append(a.dict())
-                elif type(a) is dict:
-                    arts.append(a)
-            self.artifacts = arts
-        else:
-            self.artifacts = None
-
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
+
+    def update_request_id(self):
+        self.request_id = uuid4().hex
+
+    def update_id(self, id: int):
+        self.id = id
+
+        if self.artifacts:
+            for artifact in self.artifacts:
+                artifact.container_id = self.id
+
+        3  # todo: implement
+        # if self.comments:
+        #     for comment in self.comments:
+        #         comment.container_id = self.id
+        #
+        # if self.attachments:
+        #     for attachment in self.attachments:
+        #         attachment.container_id = self.id
+
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        # del d['request_id']
+        # del d['id']
+        del d['artifacts']
+        # todo: implement
+        # del d['comments']
+        # del d['attachments']
+        # del d['audit']
+
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
 
 
 @dataclass
@@ -167,73 +209,43 @@ class ContainerRecord(Record):
     tenant: Union[int, None] = None
     version: Union[int, None] = None
     # Extras
+    request_id: str = None
+    artifacts: Union[List[ArtifactRequest], Any] = field(default_factory=list)
     attachments: Union[List[Attachment], Any] = field(default_factory=list)
+    audit_log: Union[List[AuditRecord], Any] = field(default_factory=list)
     comments: Union[List[Comment], Any] = field(default_factory=list)
-    artifacts: Union[List[Artifact], Any] = field(default_factory=list)
-    audit: Union[List[AuditRecord], Any] = field(default_factory=list)
 
     def __post_init__(self):
-        super(ContainerRecord, self).load(self.record)
+        super(ContainerRecord, self).load(**self.record)
+        print('post_artifacts:', self.artifacts)
 
-    # @property
-    # def dict(self):
-    #     d = self.__dict__
-    #     del d['attachments']
-    #     del d['artifacts']
-    #
-    #     return super(ContainerRequest, self).dict(d)
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
 
-    # @property
-    # def record(self):
-    #     d = self.__dict__
-    #     if type(d['attachments'][0]) is Attachment:
-    #         d['attachments'] = [a.dict for a in self.attachments]
-    #
-    #     if type(d['artifacts'][0]) is Artifact:
-    #         d['artifacts'] = [a.dict for a in self.artifacts]
-    #
-    #     return {k: v for k, v in d.items() if v is not None}
-    #
-    # def struct(self, **entries):
-    #     """This will take a record and return an object."""
-    #     self.__dict__.update(entries)
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        del d['request_id']
+        del d['id']
+        del d['artifacts']
+        del d['comments']
+        del d['attachments']
 
+        # if type(d['attachments'][0]) is Attachment:
+        #     d['attachments'] = [a.dict for a in self.attachments]
+        #
+        # if type(d['artifacts'][0]) is ArtifactRequest:
+        #     d['artifacts'] = [a.dict for a in self.artifacts]
 
-@dataclass
-class ContainerFilter(Record):
-    """
-    Attributes:
-        type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node
-        page (int): page number to retrieve
-        page_size (int): how many results per page
-        pretty (bool): pretty format results
-        filter (dict): {'_filter_name__icontains': 'test'}
-        include_expensive (bool): return all fields
-        sort (str): field_name to sort on
-        order (str): asc|desc
+        if cleanup:
+            del self.record
+            d = {k: v for k, v in d.items() if v is not None}
 
-    References:
-        https://my.phantom.us/4.1/docs/rest/query
-    """
-    page: int = None
-    page_size: int = 1000
-    pretty: Union[bool, int] = None
-    filter: Union[dict, None] = None
-    include_expensive: Union[bool, int] = None
-    sort: str = None
-    order: str = None
-    limit: int = None
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
 
-    def __post_init__(self):
-        if self.include_expensive or self.pretty:
-            self.page_size = 100
-
-        if self.pretty:
-            self.pretty = 1
-
-        if self.include_expensive:
-            self.include_expensive = 1
-
-        if self.filter:
-            self.load(**self.filter)
-            del self.filter
+        return d

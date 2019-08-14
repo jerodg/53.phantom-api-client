@@ -18,23 +18,42 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
+from uuid import uuid4
 
 import pytest
 from os import getenv
-from os.path import realpath
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import ContainerFilter
+from phantom_api_client.models import ArtifactRequest, Cef, ContainerRequest, RequestFilter
 
 
 @pytest.mark.asyncio
 async def test_get_container_count():
     ts = time.perf_counter()
 
-    bprint('Test: Get ContainerRequest Count')
+    bprint('Test: Get Container Count')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_container_count()
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_container_count_filtered():
+    ts = time.perf_counter()
+
+    bprint('Test: Get ContainerRequest Count')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        f = {'_filter_name__icontains': '"test"'}
+        results = await pac.get_container_count(RequestFilter(filter=f))
 
         assert type(results) is Results
         assert len(results.success) >= 1
@@ -51,14 +70,7 @@ async def test_get_containers():
 
     bprint('Test: Get Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        filter = ContainerFilter(page_size=100)
-        # container_count = (await pac.get_container_count()).success[0]['container_count']
-        # all_results = await pac.get_containers(ContainerFilter(page_size=container_count + 100))
-
-        results = await pac.get_containers(filter)
-
-        # difference = [i for i in results.success if i not in all_results.success]
-        # print('Results difference:', difference)
+        results = await pac.get_containers()
 
         ids = len(list(set([k['id'] for k in results.success])))
         print(f'Results: {len(results.success)} == Ids: {ids}?')
@@ -67,85 +79,253 @@ async def test_get_containers():
         assert len(results.success) >= 1
         assert not results.failure
         assert len(results.success) == ids  # Ensure no duplicates
-        # If a new container is created between the get_containers calls these will not match up
-        # assert container_count == len(results.success)
 
-        print(f'Fetched {len(results.success)} containers.')
         tprint(results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
 @pytest.mark.asyncio
-async def test_get_containers_performance_analysis():
-    ts = time.perf_counter()
-    bprint('Test: Get Containers Performance Analysis')
-    # Semaphore, PageSize
-    semaphores = range(1, 100, 5)
-    page_sizes = range(1, 100, 10)
-    stats = []
-
-    for semaphore in semaphores:
-        for page_size in range(1, 100, 10):
-            async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml', sem=semaphore) as pac:
-                tts = time.perf_counter()
-                results = await pac.get_containers(ContainerFilter(page_size=page_size))
-                recs = len(results.success)
-                dur = time.perf_counter() - tts
-                stat = f'| {semaphore}\t| {page_size}\t| {recs}\t| {dur:f}\t| {recs / dur:f}\t|'
-                stats.append(stat)
-                print(stat)
-
-    with open(realpath('./data/get_containers_stats_2019-07-30.txt')) as sfile:
-        sfile.writelines(stats)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts) / 60:f} minutes.')
-
-# todo: test
-@pytest.mark.asyncio
-async def test_get_container_count_filtered():
-    ts = time.perf_counter()
-
-    bprint('Test: Get ContainerRequest Count')
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        f = {'_filter_name__icontains': 'mss'}
-        results = await pac.get_container_count(ContainerFilter(filter=f))
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-# todo: test
-@pytest.mark.asyncio
 async def test_get_containers_filtered():
     ts = time.perf_counter()
 
-    bprint('Test: Get Containers')
+    bprint('Test: Get Containers Filtered')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        container_count = (await pac.get_container_count()).success[0]['container_count']
-        # all_results = await pac.get_containers(ContainerFilter(page_size=container_count + 100))
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        results = await pac.get_containers(filter=RequestFilter(filter=f))
 
-        results = await pac.get_containers()
-
-        # difference = [i for i in results.success if i not in all_results.success]
-        # print('Results difference:', difference)
-
-        ids = len(list(set([k['id'] for k, v in results.success.items()])))
+        ids = len(list(set([k['id'] for k in results.success])))
         print(f'Results: {len(results.success)} == Ids: {ids}?')
 
         assert type(results) is Results
         assert len(results.success) >= 1
         assert not results.failure
         assert len(results.success) == ids  # Ensure no duplicates
-        # If a new container is created between the get_containers calls these will not match up
-        # assert container_count == len(results.success)
 
-        print(f'Fetched {len(results.success)} containers.')
         tprint(results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_container():
+    ts = time.perf_counter()
+
+    bprint('Test: Create Container')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        uid = uuid4().hex
+        container = ContainerRequest(asset_id=None,
+                                     close_time=None,
+                                     container_type='default',
+                                     custom_fields=None,
+                                     data=None,
+                                     description='Test create container.',
+                                     due_time=None,
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='test',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     sensitivity='green',
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     open_time=None,
+                                     status=None,
+                                     tags=['test'],
+                                     tenant_id=2)
+
+        results = await pac.create_containers(containers=[container])
+
+        # todo: add auto-check for container creation
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_containers():
+    ts = time.perf_counter()
+
+    bprint('Test: Create Containers')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        uid = uuid4().hex
+        uid1 = uuid4().hex
+
+        containers = [ContainerRequest(asset_id=None,
+                                       close_time=None,
+                                       container_type='default',
+                                       custom_fields=None,
+                                       data=None,
+                                       description='Test create container.',
+                                       due_time=None,
+                                       end_time=None,
+                                       ingest_app_id=None,
+                                       kill_chain=None,
+                                       label='test',
+                                       name=f'Test: {uid}',
+                                       owner_id=9,
+                                       run_automation=False,
+                                       sensitivity='green',
+                                       severity='low',
+                                       source_data_identifier=uid,
+                                       start_time=None,
+                                       open_time=None,
+                                       status=None,
+                                       tags=['test'],
+                                       tenant_id=2),
+
+                      ContainerRequest(asset_id=None,
+                                       close_time=None,
+                                       container_type='default',
+                                       custom_fields=None,
+                                       data=None,
+                                       description='Test create container 1.',
+                                       due_time=None,
+                                       end_time=None,
+                                       ingest_app_id=None,
+                                       kill_chain=None,
+                                       label='test',
+                                       name=f'Test 1: {uid}',
+                                       owner_id=9,
+                                       run_automation=False,
+                                       sensitivity='green',
+                                       severity='low',
+                                       source_data_identifier=uid1,
+                                       start_time=None,
+                                       open_time=None,
+                                       status=None,
+                                       tags=['test'],
+                                       tenant_id=2)]
+
+        response_results, request_results = await pac.create_containers(containers=containers)
+
+        # todo: add auto-check for container creation
+        assert type(response_results) is Results
+        assert len(request_results) == 2
+        assert len(response_results.success) == 2
+        assert not response_results.failure
+
+        tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+# @pytest.mark.asyncio
+# async def test_create_container_with_customfields():
+#     ts = time.perf_counter()
+#
+#     bprint('Test: Get Containers')
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         uid = uuid4().hex
+#         custom_fields = CustomFields(alert_source=None,
+#                                      resolution_summary=None,
+#                                      incident_level=None,
+#                                      incident_category=None,
+#                                      true_resolution=None,
+#                                      analysis_completed=None,
+#                                      true_detect_time=None,
+#                                      analysis_started=None,
+#                                      compliance_contacted=None,
+#                                      contain_time=None,
+#                                      vendor_ticket_number=uid,
+#                                      mitigated='Not Applicable',
+#                                      disposition='False Positive',
+#                                      true_event_time=None,
+#                                      customer_exposure='No')
+#
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_container_with_artifact():
+    ts = time.perf_counter()
+
+    bprint('Test: Get Containers')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        cef = Cef()
+
+        uid = uuid4().hex
+        artifacts = [ArtifactRequest(cef=cef,
+                                     cef_types=None,
+                                     container_id=None,
+                                     data=None,
+                                     description='Test ArtifactRequest',
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='artifact',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     tags=['test'],
+                                     type='test')]
+
+        uid = uuid4().hex
+        container = ContainerRequest(asset_id=None,
+                                     close_time=None,
+                                     container_type='default',
+                                     custom_fields=None,
+                                     data=None,
+                                     description='Test create container w/ artifact.',
+                                     due_time=None,
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='test',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     sensitivity='green',
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     open_time=None,
+                                     status=None,
+                                     tags=['test'],
+                                     tenant_id=2,
+                                     artifacts=artifacts)
+
+        response_results, request_results = await pac.create_containers(containers=container)
+
+        # todo: add auto-check for container creation
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 2
+        assert not response_results.failure
+
+        tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+# @pytest.mark.asyncio
+# async def test_create_container_with_comments():
+#     ts = time.perf_counter()
+#
+#     bprint('Test: Get Containers')
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+#
+#
+# @pytest.mark.asyncio
+# async def test_create_container_with_attachments():
+#     ts = time.perf_counter()
+#
+#     bprint('Test: Get Containers')
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

@@ -50,6 +50,7 @@ def main() -> NoReturn:
           include_package_data=True,
           install_requires=['aiodns',
                             'aiohttp',
+                            'base-api-client',
                             'cchardet',
                             'tenacity',
                             'toml',
@@ -63,14 +64,14 @@ def main() -> NoReturn:
           packages=find_packages(),
           project_urls={'Bugs':          'https://github.com/jerodg/phantom-api-client/issues',
                         'Documentation': 'https://jerodg.github.io/phantom-api-client',
-                        'Funding':       'Paypal: jerod@jerodg.dev',
+                        'Funding':       'https://www.paypal.me/jerodgawne',
                         'Say Thanks!':   'https://saythanks.io/to/jerodg',
                         'Source':        'https://github.com/jerodg/phantom-api-client'},
           python_requires='>=3.7, <3.9',
           setup_requires=['pytest-runner'],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.1.0',
+          version='0!0.4.0',
           zip_safe=True)
 
 
