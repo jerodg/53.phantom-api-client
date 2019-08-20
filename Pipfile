@@ -16,12 +16,11 @@ pytest-cov = "*"
 setuptools = "*"
 twine = "*"
 wheel = "*"
-# Need until pypi is up:
-diskcache = "*"
 
 [packages]
 aiodns = "*"
 aiohttp = "*"
+base-api-client = "*"
 cchardet = "*"
 tenacity = "*"
 toml = "*"
