@@ -150,6 +150,135 @@ async def test_create_container():
 
 
 @pytest.mark.asyncio
+async def test_create_duplicate_container():
+    ts = time.perf_counter()
+
+    bprint('Test: Create Duplicate Container')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        uid = uuid4().hex
+        container = ContainerRequest(asset_id=None,
+                                     close_time=None,
+                                     container_type='default',
+                                     custom_fields=None,
+                                     data=None,
+                                     description='Test create container.',
+                                     due_time=None,
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='test',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     sensitivity='green',
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     open_time=None,
+                                     status=None,
+                                     tags=['test'],
+                                     tenant_id=2)
+
+        response_results, request_results = await pac.create_containers(containers=container)
+
+        # todo: add auto-check for container creation
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 1
+        assert not response_results.failure
+
+        tprint(response_results, request_results, top=5)
+        print('Creating duplicate container...')
+
+        response_results, request_results = await pac.create_containers(containers=container)
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 0
+        assert len(response_results.failure) == 1
+
+        tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_duplicate_container_update_if_exists():
+    ts = time.perf_counter()
+
+    bprint('Test: Create Duplicate Container; Update if Exists')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        uid = uuid4().hex
+        container = ContainerRequest(asset_id=None,
+                                     close_time=None,
+                                     container_type='default',
+                                     custom_fields=None,
+                                     data=None,
+                                     description='Test create container.',
+                                     due_time=None,
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='test',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     sensitivity='green',
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     open_time=None,
+                                     status=None,
+                                     tags=['test'],
+                                     tenant_id=2)
+
+        response_results, request_results = await pac.create_containers(containers=container)
+
+        # todo: add auto-check for container creation
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 1
+        assert not response_results.failure
+
+        tprint(response_results, request_results, top=5)
+        print('Creating duplicate container...')
+
+        container = ContainerRequest(asset_id=None,
+                                     close_time=None,
+                                     container_type='default',
+                                     custom_fields=None,
+                                     data=None,
+                                     description='Test create container; udpate if exists.',
+                                     due_time=None,
+                                     end_time=None,
+                                     ingest_app_id=None,
+                                     kill_chain=None,
+                                     label='test',
+                                     name=f'Test: {uid}',
+                                     owner_id=9,
+                                     run_automation=False,
+                                     sensitivity='green',
+                                     severity='low',
+                                     source_data_identifier=uid,
+                                     start_time=None,
+                                     open_time=None,
+                                     status=None,
+                                     tags=['test'],
+                                     tenant_id=2)
+
+        response_results, request_results = await pac.create_containers(containers=container)
+
+        # todo: verify update took place
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 0
+        assert len(response_results.failure) == 1
+
+        tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
 async def test_create_containers():
     ts = time.perf_counter()
 

@@ -48,13 +48,14 @@ class PhantomApiClient(BaseApiClient):
         BaseApiClient.__init__(self, cfg=cfg, sem=sem or self.SEM)
 
         self.session = aio.ClientSession(headers={**self.HDR, 'ph-auth-token': self.cfg['Auth']['Token']},
-                                         json_serialize=ujson.dumps)
+                                         json_serialize=ujson.dumps,
+                                         auth=aio.BasicAuth(login=self.cfg['Auth']['Username'],
+                                                            password=self.cfg['Auth']['Password']))
 
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.session.__aexit__(exc_type, exc_val, exc_tb)
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
 
     async def get_artifact_count(self, container_id: int, filter: Optional[RequestFilter] = RequestFilter()) -> Results:
@@ -115,9 +116,9 @@ class PhantomApiClient(BaseApiClient):
         return await self.process_results(results, 'data')
 
     async def create_artifacts(self, artifacts: Union[
-        List[ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]) -> Union[
-        Results, List[Union[List[ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]], List[
-            ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]:
+        List[ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]) -> Tuple[Results, Union[
+        List[Union[List[ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]], List[
+            ContainerRequest], ContainerRequest, List[ArtifactRequest], ArtifactRequest]]:
         if type(artifacts) is not list:
             artifacts = [artifacts]
 
@@ -161,15 +162,11 @@ class PhantomApiClient(BaseApiClient):
 
         return results, artifacts
 
-            # return results
-            # return artifacts
-
-            # return artifacts
-
     async def create_containers(self, containers: Union[List[ContainerRequest], ContainerRequest],
-                                revert_failure: bool = False) -> Tuple[Results, Any]:
+                                revert_failure: bool = False, update_existing: Optional[bool] = False) -> Tuple[Results, Any]:
         # todo: handle revert_failure
         # todo: handle failure (already exists)
+        # todo: handle update_existing
         if type(containers) is not list:
             containers = [containers]
 
@@ -187,6 +184,21 @@ class PhantomApiClient(BaseApiClient):
         container_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
         # print('container_results1:', container_results)
         logger.debug('-> Complete.')
+
+        if update_existing:
+            needs_update = []
+            if results := container_results.failure:
+                for result in results:
+                    if result['existing_container_id']:
+                        container = [c for c in containers if c.request_id == result['request_id']]
+                        needs_update.append(container)
+
+            if needs_update:
+                tasks = [asyncio.create_task(self.request(method='post',
+                                                          end_point=f'/container/{c.id}',
+                                                          request_id=c.request_id,
+                                                          json=c.dict())) for c in containers]
+                container_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
         # Populate container_id(s)
         [c.update_id(next((_['id'] for _ in container_results.success if _['request_id'] == c.request_id), None))
@@ -214,8 +226,11 @@ class PhantomApiClient(BaseApiClient):
 
         container_results.cleanup()
         return container_results, containers
-        # return await self.process_results(results, 'data')
-        # return containers
+
+    async def delete_containers(self, container_ids: Union[List[int], int]):
+        tasks = [asyncio.create_task(self.request(method='delete', end_point=f'/container/{cid}')) for cid in container_ids]
+
+        return await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
 
 if __name__ == '__main__':
