@@ -29,7 +29,6 @@ from phantom_api_client.models.attachment import Attachment
 from phantom_api_client.models.audit import AuditRecord
 from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.custom_fields import CustomFields
-from phantom_api_client.models.exceptions import InvalidOptionError
 
 
 @dataclass
@@ -67,47 +66,6 @@ class ContainerRequest(Record):
     # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
-        # todo: validate custom fields if status == Closed
-        label_opts = ['53investigation-mailbox',
-                      'crowdstrike-alerts',
-                      'events',
-                      'fireeye',
-                      'fireeye-alerts',
-                      'insiders',
-                      'mss',
-                      'phishlabs',
-                      'qradar-offenses',
-                      'securityawareness-mailbox',
-                      'splunk',
-                      'test',
-                      'timer',
-                      None]
-        if self.label not in label_opts:
-            raise InvalidOptionError('label', label_opts)
-
-        kill_chain_opts = ['Reconnaissance',
-                           'Weaponization',
-                           'Delivery',
-                           'Exploitation',
-                           'Installation',
-                           'Command & Control',
-                           'Actions on Objectives',
-                           None]
-        if self.kill_chain not in kill_chain_opts:
-            raise InvalidOptionError('kill_chain', kill_chain_opts)
-
-        sensitivity_opts = ['white', 'green', 'amber', 'red', None]
-        if self.sensitivity not in sensitivity_opts:
-            raise InvalidOptionError('sensitivity', sensitivity_opts)
-
-        severity_opts = ['low', 'medium', 'high', None]
-        if self.severity not in severity_opts:
-            raise InvalidOptionError('severity', severity_opts)
-
-        status_opts = ['new', 'open', 'resolved', None]
-        if self.status not in status_opts:
-            raise InvalidOptionError('status', status_opts)
-
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
@@ -121,7 +79,7 @@ class ContainerRequest(Record):
             for artifact in self.artifacts:
                 artifact.container_id = self.id
 
-        3  # todo: implement
+        # todo: implement
         # if self.comments:
         #     for comment in self.comments:
         #         comment.container_id = self.id

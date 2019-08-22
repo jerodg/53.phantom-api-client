@@ -24,7 +24,6 @@ from uuid import uuid4
 
 from base_api_client.models.record import Record
 from phantom_api_client.models.cef import Cef
-from phantom_api_client.models.exceptions import InvalidOptionError
 
 
 @dataclass
@@ -51,25 +50,6 @@ class ArtifactRequest(Record):
     id: int = None
 
     def __post_init__(self):
-        kill_chain_opts = ['Reconnaissance',
-                           'Weaponization',
-                           'Delivery',
-                           'Exploitation',
-                           'Installation',
-                           'Command & Control',
-                           'Actions on Objectives',
-                           None]
-        if self.kill_chain not in kill_chain_opts:
-            raise InvalidOptionError('kill_chain', kill_chain_opts)
-
-        label_opts = ['event', 'net flow', 'artifact', 'network', 'test', 'mss', 'qradar-offenses', None]
-        if self.label not in label_opts:
-            raise InvalidOptionError('label', label_opts)
-
-        severity_opts = ['low', 'medium', 'high', None]
-        if self.severity not in severity_opts:
-            raise InvalidOptionError('severity', severity_opts)
-
         if self.data:
             self.data = dict(sorted({k: v for k, v in self.data.items() if v is not None}.items()))
 
@@ -77,5 +57,4 @@ class ArtifactRequest(Record):
             self.cef = self.cef.dict
 
     def update_id(self, id: int):
-        print('update_id:', id)
         self.id = id

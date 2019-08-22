@@ -23,28 +23,48 @@ import pytest
 from os import getenv
 
 from base_api_client import bprint, Results, tprint
-from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import ContainerFilter
+from phantom_api_client import PhantomApiClient, RequestFilter
 
 
 # todo: write delete function 😅
 @pytest.mark.asyncio
-async def test_get_containers_filtered():
+async def test_delete_containers():
     ts = time.perf_counter()
 
-    bprint('Test: Get Containers')
+    bprint('Test: Delete Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
-        results = await pac.get_containers(ContainerFilter(filter=f))
+        # Get test containers
+        f = {'_filter_name__icontains': '"bricata"', '_filter_tenant': 2}
+        results = await pac.get_containers(RequestFilter(filter=f))
 
-        ids = len(list(set([k['id'] for k in results.success])))
-        print(f'Results: {len(results.success)} == Ids: {ids}?')
+        ids = [k['id'] for k in results.success]
+        print(f'Found {len(ids)} ids.')
 
         assert type(results) is Results
         assert len(results.success) >= 1
         assert not results.failure
-        assert len(results.success) == ids  # Ensure no duplicates
 
+        print('Get Test Containers:')
+        tprint(results, top=5)
+
+        # Delete test containers
+        results = await pac.delete_containers(container_ids=ids)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        print('Delete Test Containers')
+        tprint(results, top=5)
+
+        # Verify test containers have been deleted
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        results = await pac.get_containers(RequestFilter(filter=f))
+        assert type(results) is Results
+        assert len(results.success) == 0
+        assert not results.failure
+
+        print('Get Test Containers After Delete')
         tprint(results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

@@ -40,7 +40,6 @@ def main() -> NoReturn:
                        'Operating System :: MacOS :: MacOS X',
                        'Operating System :: Microsoft :: Windows',
                        'Operating System :: POSIX',
-                       'Programming Language :: Python :: 3.7',
                        'Programming Language :: Python :: 3.8',
                        'Topic :: Utilities',
                        'Topic :: Internet',
@@ -67,11 +66,11 @@ def main() -> NoReturn:
                         'Funding':       'https://www.paypal.me/jerodgawne',
                         'Say Thanks!':   'https://saythanks.io/to/jerodg',
                         'Source':        'https://github.com/jerodg/phantom-api-client'},
-          python_requires='>=3.7, <3.9',
+          python_requires='>=3.8, <3.9',
           setup_requires=['pytest-runner'],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.4.0',
+          version='0!0.5.0',
           zip_safe=True)
 
 

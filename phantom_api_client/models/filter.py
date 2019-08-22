@@ -19,7 +19,7 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 
 from base_api_client.models.record import Record
 
@@ -36,18 +36,22 @@ class RequestFilter(Record):
         include_expensive (bool): return all fields
         sort (str): field_name to sort on
         order (str): asc|desc
+        limit (int): limit number of records returned
+        id (int): object_id e.g. container/artifact
 
     References:
         https://my.phantom.us/4.1/docs/rest/query
     """
-    page: int = None
-    page_size: int = 100
-    pretty: Union[bool, int] = None
-    filter: Union[dict, None] = None
-    include_expensive: Union[bool, int] = None
-    sort: str = None
-    order: str = None
-    limit: int = None
+    type: Optional[str] = None
+    page: Optional[int] = None
+    page_size: Optional[int] = 100
+    pretty: Optional[Union[bool, int]] = None
+    filter: Optional[Union[dict, None]] = None
+    include_expensive: Optional[Union[bool, int]] = None
+    sort: Optional[str] = None
+    order: Optional[str] = None
+    limit: Optional[int] = None
+    id: Optional[int] = None
 
     def __post_init__(self):
         if self.include_expensive or self.pretty:

@@ -16,6 +16,8 @@ pytest-cov = "*"
 setuptools = "*"
 twine = "*"
 wheel = "*"
+# Temporary
+diskcache = "*"
 
 [packages]
 aiodns = "*"
