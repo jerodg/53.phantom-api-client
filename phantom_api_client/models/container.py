@@ -98,8 +98,8 @@ class ContainerRequest(Record):
         Returns:
             d (dict):"""
         d = {**self.__dict__}
-        # del d['request_id']
-        # del d['id']
+        del d['request_id']
+        del d['id']
         del d['artifacts']
         # todo: implement
         # del d['comments']
@@ -189,15 +189,15 @@ class ContainerRecord(Record):
         d = {**self.__dict__}
         del d['request_id']
         del d['id']
-        del d['artifacts']
+        del d['containers']
         del d['comments']
         del d['attachments']
 
         # if type(d['attachments'][0]) is Attachment:
         #     d['attachments'] = [a.dict for a in self.attachments]
         #
-        # if type(d['artifacts'][0]) is ArtifactRequest:
-        #     d['artifacts'] = [a.dict for a in self.artifacts]
+        # if type(d['containers'][0]) is ArtifactRequest:
+        #     d['containers'] = [a.dict for a in self.containers]
 
         if cleanup:
             del self.record
