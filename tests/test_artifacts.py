@@ -31,7 +31,7 @@ from phantom_api_client.models import ArtifactRequest, Cef, RequestFilter
 
 @pytest.mark.asyncio
 async def test_get_artifact_count():
-    # This needs test containers/artifacts created; see test_containers.py
+    # This needs test containers/containers created; see test_containers.py
     ts = time.perf_counter()
     bprint('Test: Get Artifact Count')
 

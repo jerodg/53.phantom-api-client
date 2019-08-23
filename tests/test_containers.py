@@ -18,6 +18,8 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
+from time import sleep
+from typing import List, Optional
 from uuid import uuid4
 
 import pytest
@@ -26,6 +28,66 @@ from os import getenv
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ArtifactRequest, Cef, ContainerRequest, RequestFilter
+
+
+def generate_artifacts(artifact_count: Optional[int] = 1) -> List[ArtifactRequest]:
+    artifacts = []
+    for i in range(0, artifact_count):
+        uid = uuid4().hex
+        cef = Cef()
+        artifacts.append(ArtifactRequest(cef=cef,
+                                         cef_types=None,
+                                         container_id=None,
+                                         data=None,
+                                         description=f'Test Create Artifact {i}.',
+                                         end_time=None,
+                                         ingest_app_id=None,
+                                         kill_chain=None,
+                                         label='artifact',
+                                         name=f'Test: {uid}',
+                                         owner_id=9,
+                                         run_automation=False,
+                                         severity='low',
+                                         source_data_identifier=uid,
+                                         start_time=None,
+                                         tags=['test'],
+                                         type='test'))
+        sleep(.1)
+
+    return artifacts
+
+
+def generate_containers(container_count: Optional[int] = 1, artifact_count: Optional[int] = 0) -> List[ContainerRequest]:
+    containers = []
+    for i in range(0, container_count):
+        uid = uuid4().hex
+        containers.append(ContainerRequest(asset_id=None,
+                                           close_time=None,
+                                           container_type='default',
+                                           custom_fields=None,
+                                           data=None,
+                                           description=f'Test create container {i}.',
+                                           due_time=None,
+                                           end_time=None,
+                                           ingest_app_id=None,
+                                           kill_chain=None,
+                                           label='test',
+                                           name=f'Test: {uid}',
+                                           owner_id=9,
+                                           run_automation=False,
+                                           sensitivity='green',
+                                           severity='low',
+                                           source_data_identifier=uid,
+                                           start_time=None,
+                                           open_time=None,
+                                           status=None,
+                                           tags=['test'],
+                                           tenant_id=2,
+                                           artifacts=generate_artifacts(artifact_count=artifact_count),
+                                           request_id=uuid4().hex))
+        sleep(.1)
+
+    return containers
 
 
 @pytest.mark.asyncio
@@ -113,38 +175,16 @@ async def test_create_container():
 
     bprint('Test: Create Container')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        uid = uuid4().hex
-        container = ContainerRequest(asset_id=None,
-                                     close_time=None,
-                                     container_type='default',
-                                     custom_fields=None,
-                                     data=None,
-                                     description='Test create container.',
-                                     due_time=None,
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='test',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     sensitivity='green',
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     open_time=None,
-                                     status=None,
-                                     tags=['test'],
-                                     tenant_id=2)
-
-        results = await pac.create_containers(containers=[container])
+        container = generate_containers()
+        response_results, request_results = await pac.create_containers(containers=container)
 
         # todo: add auto-check for container creation
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 1
+        assert not response_results.failure
 
-        tprint(results, top=5)
+        tprint(response_results, request_results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -155,30 +195,7 @@ async def test_create_duplicate_container():
 
     bprint('Test: Create Duplicate Container')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        uid = uuid4().hex
-        container = ContainerRequest(asset_id=None,
-                                     close_time=None,
-                                     container_type='default',
-                                     custom_fields=None,
-                                     data=None,
-                                     description='Test create container.',
-                                     due_time=None,
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='test',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     sensitivity='green',
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     open_time=None,
-                                     status=None,
-                                     tags=['test'],
-                                     tenant_id=2)
-
+        container = generate_containers()
         response_results, request_results = await pac.create_containers(containers=container)
 
         # todo: add auto-check for container creation
@@ -207,30 +224,7 @@ async def test_create_duplicate_container_update_if_exists():
 
     bprint('Test: Create Duplicate Container; Update if Exists')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        uid = uuid4().hex
-        container = ContainerRequest(asset_id=None,
-                                     close_time=None,
-                                     container_type='default',
-                                     custom_fields=None,
-                                     data=None,
-                                     description='Test create container.',
-                                     due_time=None,
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='test',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     sensitivity='green',
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     open_time=None,
-                                     status=None,
-                                     tags=['test'],
-                                     tenant_id=2)
-
+        container = generate_containers()
         response_results, request_results = await pac.create_containers(containers=container)
 
         # todo: add auto-check for container creation
@@ -241,30 +235,7 @@ async def test_create_duplicate_container_update_if_exists():
 
         tprint(response_results, request_results, top=5)
         print('Creating duplicate container...')
-
-        container = ContainerRequest(asset_id=None,
-                                     close_time=None,
-                                     container_type='default',
-                                     custom_fields=None,
-                                     data=None,
-                                     description='Test create container; udpate if exists.',
-                                     due_time=None,
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='test',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     sensitivity='green',
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     open_time=None,
-                                     status=None,
-                                     tags=['test'],
-                                     tenant_id=2)
-
+        container[0].description = 'Test create container; udpate if exists.'
         response_results, request_results = await pac.create_containers(containers=container)
 
         # todo: verify update took place
@@ -284,61 +255,14 @@ async def test_create_containers():
 
     bprint('Test: Create Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        uid = uuid4().hex
-        uid1 = uuid4().hex
-
-        containers = [ContainerRequest(asset_id=None,
-                                       close_time=None,
-                                       container_type='default',
-                                       custom_fields=None,
-                                       data=None,
-                                       description='Test create container.',
-                                       due_time=None,
-                                       end_time=None,
-                                       ingest_app_id=None,
-                                       kill_chain=None,
-                                       label='test',
-                                       name=f'Test: {uid}',
-                                       owner_id=9,
-                                       run_automation=False,
-                                       sensitivity='green',
-                                       severity='low',
-                                       source_data_identifier=uid,
-                                       start_time=None,
-                                       open_time=None,
-                                       status=None,
-                                       tags=['test'],
-                                       tenant_id=2),
-
-                      ContainerRequest(asset_id=None,
-                                       close_time=None,
-                                       container_type='default',
-                                       custom_fields=None,
-                                       data=None,
-                                       description='Test create container 1.',
-                                       due_time=None,
-                                       end_time=None,
-                                       ingest_app_id=None,
-                                       kill_chain=None,
-                                       label='test',
-                                       name=f'Test 1: {uid}',
-                                       owner_id=9,
-                                       run_automation=False,
-                                       sensitivity='green',
-                                       severity='low',
-                                       source_data_identifier=uid1,
-                                       start_time=None,
-                                       open_time=None,
-                                       status=None,
-                                       tags=['test'],
-                                       tenant_id=2)]
-
+        container_count = 3
+        containers = generate_containers(container_count=container_count)
         response_results, request_results = await pac.create_containers(containers=containers)
 
         # todo: add auto-check for container creation
         assert type(response_results) is Results
-        assert len(request_results) == 2
-        assert len(response_results.success) == 2
+        assert len(request_results) == container_count
+        assert len(response_results.success) == container_count
         assert not response_results.failure
 
         tprint(response_results, request_results, top=5)
@@ -380,63 +304,48 @@ async def test_create_container_with_artifact():
 
     bprint('Test: Get Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        cef = Cef()
-
-        uid = uuid4().hex
-        artifacts = [ArtifactRequest(cef=cef,
-                                     cef_types=None,
-                                     container_id=None,
-                                     data=None,
-                                     description='Test ArtifactRequest',
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='artifact',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     tags=['test'],
-                                     type='test')]
-
-        uid = uuid4().hex
-        container = ContainerRequest(asset_id=None,
-                                     close_time=None,
-                                     container_type='default',
-                                     custom_fields=None,
-                                     data=None,
-                                     description='Test create container w/ artifact.',
-                                     due_time=None,
-                                     end_time=None,
-                                     ingest_app_id=None,
-                                     kill_chain=None,
-                                     label='test',
-                                     name=f'Test: {uid}',
-                                     owner_id=9,
-                                     run_automation=False,
-                                     sensitivity='green',
-                                     severity='low',
-                                     source_data_identifier=uid,
-                                     start_time=None,
-                                     open_time=None,
-                                     status=None,
-                                     tags=['test'],
-                                     tenant_id=2,
-                                     artifacts=artifacts)
-
-        response_results, request_results = await pac.create_containers(containers=container)
+        container_count = 1
+        artifact_count = 1
+        containers = generate_containers(container_count=container_count, artifact_count=artifact_count)
+        response_results, request_results = await pac.create_containers(containers=containers)
 
         # todo: add auto-check for container creation
         assert type(response_results) is Results
-        assert len(request_results) == 1
-        assert len(response_results.success) == 2
+        assert len(request_results) == container_count
+        assert len(response_results.success) == container_count + artifact_count
         assert not response_results.failure
 
         tprint(response_results, request_results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_containers_with_artifacts():
+    ts = time.perf_counter()
+
+    bprint('Test: Get Containers')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        container_count = 2
+        artifact_count = 2
+        containers = generate_containers(container_count=container_count, artifact_count=artifact_count)
+        # response_results, request_results = await pac.create_containers(containers=containers)
+        # print('before_containers')
+        # print(*containers, sep='\n')
+        response_results, request_results = await pac.create_containers(containers=containers)
+
+        # todo: add auto-check for container creation
+        assert type(response_results) is Results
+        assert len(request_results) == container_count
+        # assert len(response_results.success) == container_count + artifact_count
+        assert not response_results.failure
+
+        tprint(response_results, request_results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+# todo: Test create multiple containers with multiple containers (containers seem to be put into one container)
+# todo: test update_existing
 
 # @pytest.mark.asyncio
 # async def test_create_container_with_comments():
