@@ -27,7 +27,6 @@ from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient, RequestFilter
 
 
-# todo: write delete function 😅
 @pytest.mark.asyncio
 async def test_delete_containers() -> NoReturn:
     ts = time.perf_counter()
@@ -35,8 +34,9 @@ async def test_delete_containers() -> NoReturn:
     bprint('Test: Delete Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         # Get test containers
-        f = {'_filter_name__icontains': '"bricata"', '_filter_tenant': 2}
+        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
         results = await pac.get_containers(RequestFilter(filter=f))
+        print('results:', len(results.success))
 
         ids = [k['id'] for k in results.success]
         print(f'Found {len(ids)} ids.')
@@ -47,6 +47,18 @@ async def test_delete_containers() -> NoReturn:
 
         print('Get Test Containers:')
         tprint(results, top=5)
+
+        # Get containers older than...
+        # date_window = Delorean(datetime=dt.datetime(2019, 9, 1), timezone='UTC')
+        # containers = []
+        # for result in results.success:
+        #     st = parse(result['start_time'], dayfirst=False)
+        #
+        #     if st < date_window:
+        #         # print('result:', result)
+        #         # print('st:', st)
+        #         containers.append(result['id'])
+        # print(f'Found {len(containers)}, containers.')
 
         # Delete test containers
         results1 = await pac.delete_containers(container_ids=ids)

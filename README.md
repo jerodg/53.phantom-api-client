@@ -26,6 +26,132 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
+## API Implementation (7/100) 7%
+- [ ] Actions:
+    - [ ] Run Action
+    - [ ] Cancel Running Action
+- [ ] Aggregation Rules:
+    - [ ] Create Rule
+    - [ ] Update Rule
+    - [ ] Delete Rule
+- [ ] Apps:
+    - Install App    
+- [ ] Artifacts:
+    - [x] Get Artifact Count
+    - [ ] Get Artifact
+    - [ ] Get Artifacts    
+    - [ ] Create Artifact
+    - [ ] Create Artifacts
+    - [ ] Update Artifact
+    - [ ] Update Artifacts
+    - [ ] Delete Artifact
+    - [ ] Delete Artifacts
+- [ ] Assets:
+    - [ ] Create Assets
+- [ ] Attachments:
+    - [ ] Get Attachment
+    - [ ] Get Attachments
+    - [ ] Create Attachment
+    - [ ] Delete Attachment
+- [ ] Audit:
+    - [ ] Get Audit Data
+- [ ] CEF:
+    - [ ] Get Available CEFs
+    - [ ] Create Custom CEF
+    - [ ] Get Custom CEFs
+    - [ ] Get Custom CEF
+    - [ ] Update Custom CEF
+    - [ ] Delete Custom CEF
+- [ ] Clustering:
+    - [ ] Get Nodes
+- [ ] Containers:
+    - [x] Get Container Count
+    - [ ] Get Container
+    - [x] Get Containers
+    - [x] Create Container
+    - [x] Create Containers
+    - [ ] Update Container
+    - [ ] Update Containers
+    - [x] Delete Container
+    - [x] Delete Containers
+    - [ ] Get Whitelisted Users
+    - [ ] Get Whitelist Candidates (users who can view a container)
+- [ ] Custom Lists:
+    - [ ] Get List
+    - [ ] Create List
+    - [ ] Update List
+    - [ ] Delete List
+- [ ] Evidence:
+    - [ ] Get Container Evidence
+    - [ ] Create Container Evidence
+    - [ ] Delete Container Evidence
+- [ ] HUD:
+    - [ ] Pin Container
+    - [ ] Update Pin
+- [ ] Indicators:
+    - [ ] Get Indicator Counts
+    - [ ] Get Top Event Labels
+    - [ ] Get Top Indicator Types
+    - [ ] Get Top Indicator Values
+    - [ ] Get Indicators
+    - [ ] Get Indicator
+    - [ ] Get Artifacts by Indicator
+    - [ ] Get Indicator Timeline by Value
+    - [ ] Get Containers by Indicator
+- [ ] Informational:
+    - [ ] Get Version
+    - [ ] Get System Info
+    - [ ] Get License
+    - [ ] Get System Health
+    - [ ] Get App Status Info
+    - [ ] Get Widget Info    
+- [ ] Notes:
+    - [ ] Create Container Note
+    - [ ] Create Containers Notes
+    - [ ] Create Artifact Note
+    - [ ] Create Task Note
+    - [ ] Update Container Note
+    - [ ] Get Container Notes
+    - [ ] Get Container Note
+    - [ ] Delete Note
+    - [ ] Get Artifact Notes
+    - [ ] Get Task Notes
+    - [ ] Search Notes
+- [ ] Playbooks:
+    - [ ] Update Playbook Status
+    - [ ] Run Playbook
+    - [ ] Cancel Running Playbook
+    - [ ] Update Source Control Repository
+- [ ] Search:
+    - [ ] Run Search
+- [ ] Severity:
+    - [ ] Get Severity's
+    - [ ] Create Severity
+    - [ ] Delete Severity
+    - [ ] Update Severity
+- [ ] Status:
+    - [ ] Get Status Labels
+    - [ ] Create Status Label
+    - [ ] Delete Status Label
+- [ ] System Settings:
+    - [ ] Update System Settings
+- [ ] Tenants:
+    - [ ] Create Tenant
+    - [ ] Update Tenant
+- [ ] Users:
+    - [ ] Get User
+    - [ ] Get Users
+    - [ ] Create User
+    - [ ] Update User
+    - [ ] Create Role/Permissions
+- [ ] Workbooks (formerly known as Case Templates):
+    - [ ] Create Case Workflow Template
+    - [ ] Create Phase Object
+    - [ ] Create Task Object
+    - [ ] Add Phase Template to Workflow Template
+    - [ ] Add Task to Phase Template 
+    - [ ] Get Workbook Phases
+
 ## Performance Notes
 Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM
 
