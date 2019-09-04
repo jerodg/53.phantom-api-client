@@ -20,7 +20,7 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 import asyncio
 import logging
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, NoReturn, Optional, Tuple, Union
 from uuid import uuid4
 
 import aiohttp as aio
@@ -55,7 +55,8 @@ class PhantomApiClient(BaseApiClient):
     async def __aenter__(self):
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: None, exc_val: None, exc_tb: None) -> NoReturn:
+        await self.session.close()
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
 
     async def get_artifact_count(self, container_id: int, filter: Optional[RequestFilter] = RequestFilter()) -> Results:
@@ -136,6 +137,8 @@ class PhantomApiClient(BaseApiClient):
                                                       end_point='/artifact',
                                                       request_id=a.request_id,
                                                       json=a.dict())) for x in containers for a in x.artifacts]
+            # print('tasks')
+            # print(*tasks, sep='\n')
         else:  # ArtifactRequest
             containers[-1].run_automation = True
             tasks = [asyncio.create_task(self.request(method='post',
@@ -190,6 +193,7 @@ class PhantomApiClient(BaseApiClient):
         # print('container_results1:', container_results)
         logger.debug('-> Complete.')
 
+        # todo: test/finish this
         # if update_existing:
         #     needs_update = []
         #     if results := container_results.failure:
@@ -213,18 +217,6 @@ class PhantomApiClient(BaseApiClient):
             result['container_id'] = result['id']
             del result['id']
 
-        # print('containers:')
-        # print(*containers, sep='\n')
-
-        # for c in containers:
-        #     del c.request_id
-
-        # Create Comments
-
-        # Create Attachments
-
-        # Create Artifacts
-        # print('containers1:', containers)
         artifact_results, containers = await self.create_artifacts(containers)
         # print('artifact_reulst3:', artifact_results)
 
