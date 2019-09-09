@@ -108,6 +108,27 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results, 'data')
 
+    async def get_user_data(self):
+        """
+
+        Args:
+            subject (str): One of, user|role|authentication|administration|playbook|container
+            params (Union[List[str], str): <subject_id(s)>|*
+                playbook & container may alternatively specify name
+
+        Returns:
+        """
+        # todo: filter
+        logger.debug(f'Getting user data...')
+
+        tasks = [asyncio.create_task(self.request(method='get', end_point='/ph_user', request_id=uuid4().hex))]
+
+        results = Results(data=await asyncio.gather(*tasks))
+
+        logger.debug('-> Complete.')
+
+        return await self.process_results(results, 'data')
+
     async def get_container_count(self, filter: Optional[RequestFilter] = RequestFilter()) -> Results:
         filter.page_size = 1  # Only need one record to get the total count
         filter.page = 0
@@ -148,7 +169,7 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results, 'data')
 
-    async def create_artifacts(self, containers: List[ContainerRequest]) -> Tuple[Results, ContainerRequest]:
+    async def create_artifacts(self, containers: List[ContainerRequest]) -> Tuple[Results, List[ContainerRequest]]:
         # if type(containers) is not list:
         #     containers = [containers]
 
