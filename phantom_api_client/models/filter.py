@@ -66,3 +66,4 @@ class RequestFilter(Record):
         if self.filter:
             self.load(**self.filter)
             del self.filter
+

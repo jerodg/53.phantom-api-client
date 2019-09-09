@@ -76,6 +76,38 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results)
 
+    async def get_audit_data(self, subject: str, params: Optional[Union[List[int], int]]):
+        """
+
+        Args:
+            subject (str): One of, user|role|authentication|administration|playbook|container
+            params (Union[List[str], str): <subject_id(s)>|*
+                playbook & container may alternatively specify name
+
+        Returns:
+        """
+        type_opts = ['user', 'role', 'authentication', 'administartion', 'playbook', 'container']
+        assert subject in type_opts
+
+        if type(params) is not list:
+            params = [params]
+
+        parms = [(subject, p) for p in params]
+        print('params:', parms)
+
+        logger.debug(f'Getting audit data for, {subject}...')
+
+        tasks = [asyncio.create_task(self.request(method='get',
+                                                  end_point='/audit',
+                                                  request_id=uuid4().hex,
+                                                  params=parms))]
+
+        results = Results(data=await asyncio.gather(*tasks))
+
+        logger.debug('-> Complete.')
+
+        return await self.process_results(results, 'data')
+
     async def get_container_count(self, filter: Optional[RequestFilter] = RequestFilter()) -> Results:
         filter.page_size = 1  # Only need one record to get the total count
         filter.page = 0

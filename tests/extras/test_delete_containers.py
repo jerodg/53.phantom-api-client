@@ -34,7 +34,7 @@ async def test_delete_containers() -> NoReturn:
     bprint('Test: Delete Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         # Get test containers
-        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
+        f = {'_filter_name__icontains': '"test"'}
         results = await pac.get_containers(RequestFilter(filter=f))
         print('results:', len(results.success))
 
