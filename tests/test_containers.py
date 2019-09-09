@@ -46,7 +46,7 @@ def generate_artifacts(artifact_count: Optional[int] = 1) -> List[ArtifactReques
                                          label='artifact',
                                          name=f'Test: {uid}',
                                          owner_id=9,
-                                         run_automation=False,
+                                         run_automation=True,
                                          severity='low',
                                          source_data_identifier=uid,
                                          start_time=None,
@@ -74,7 +74,7 @@ def generate_containers(container_count: Optional[int] = 1, artifact_count: Opti
                                            label='test',
                                            name=f'Test: {uid}',
                                            owner_id=9,
-                                           run_automation=False,
+                                           run_automation=True,
                                            sensitivity='green',
                                            severity='low',
                                            source_data_identifier=uid,
@@ -327,7 +327,7 @@ async def test_create_containers_with_artifacts():
     bprint('Test: Get Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         container_count = 1
-        artifact_count = 2
+        artifact_count = 3
         containers = generate_containers(container_count=container_count, artifact_count=artifact_count)
         containers.extend(generate_containers(container_count=container_count, artifact_count=artifact_count))
 

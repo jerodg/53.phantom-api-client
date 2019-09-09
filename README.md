@@ -26,7 +26,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation (7/100) 7%
+## API Implementation (8/100) 8%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -54,7 +54,7 @@ This modules' primary use-case is inheritance from other REST API clients.
     - [ ] Create Attachment
     - [ ] Delete Attachment
 - [ ] Audit:
-    - [ ] Get Audit Data
+    - [x] Get Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
     - [ ] Create Custom CEF
