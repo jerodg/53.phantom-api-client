@@ -17,15 +17,12 @@ pytest-cov = "*"
 setuptools = "*"
 twine = "*"
 wheel = "*"
-# Temporary
-diskcache = "*"
 
 [packages]
 aiodns = "*"
 aiohttp = "*"
 base-api-client = "*"
 cchardet = "*"
-tenacity = "*"
 toml = "*"
 ujson = "*"
 
