@@ -9,7 +9,7 @@
 ![python](https://img.shields.io/badge/Python-3.7/8%2B-blue.svg)
 ![phantom](https://img.shields.io/badge/Phantom-4.2+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-![0%](https://img.shields.io/badge/Coverage-0%25-red.svg)
+![0%](https://img.shields.io/badge/Coverage-%25-red.svg)
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
 
 (Splunk) Phantom API client.
@@ -26,7 +26,8 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation (8/100) 8%
+## API Implementation, Categories (0/24) 0%, Functions (5/103) ~4.8%
+__*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -35,11 +36,13 @@ This modules' primary use-case is inheritance from other REST API clients.
     - [ ] Update Rule
     - [ ] Delete Rule
 - [ ] Apps:
-    - Install App    
+    - [ ] Install App    
 - [ ] Artifacts:
-    - [x] Get Artifact Count
-    - [ ] Get Artifact
-    - [ ] Get Artifacts    
+    - [x] Get All Artifacts Count
+    - [x] Get Container Artifacts Count
+    - [x] Get All Artifacts
+    - [x] Get One Artifact
+    - [x] Get All Container Artifacts    
     - [ ] Create Artifact
     - [ ] Create Artifacts
     - [ ] Update Artifact
@@ -54,7 +57,7 @@ This modules' primary use-case is inheritance from other REST API clients.
     - [ ] Create Attachment
     - [ ] Delete Attachment
 - [ ] Audit:
-    - [x] Get Audit Data
+    - [] Get Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
     - [ ] Create Custom CEF
@@ -65,15 +68,15 @@ This modules' primary use-case is inheritance from other REST API clients.
 - [ ] Clustering:
     - [ ] Get Nodes
 - [ ] Containers:
-    - [x] Get Container Count
+    - [ ] Get Container Count
     - [ ] Get Container
-    - [x] Get Containers
-    - [x] Create Container
-    - [x] Create Containers
+    - [ ] Get Containers
+    - [ ] Create Container
+    - [ ] Create Containers
     - [ ] Update Container
     - [ ] Update Containers
-    - [x] Delete Container
-    - [x] Delete Containers
+    - [ ] Delete Container
+    - [ ] Delete Containers
     - [ ] Get Whitelisted Users
     - [ ] Get Whitelist Candidates (users who can view a container)
 - [ ] Custom Lists:
@@ -140,6 +143,7 @@ This modules' primary use-case is inheritance from other REST API clients.
     - [ ] Update Tenant
 - [ ] Users:
     - [ ] Get User
+    - [ ] Get User Count
     - [ ] Get Users
     - [ ] Create User
     - [ ] Update User
