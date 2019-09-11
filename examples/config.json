@@ -1,7 +1,9 @@
 {
   "Auth": {
     "Username": "",
-    "Password": ""
+    "Password": "",
+    "Header": "",
+    "Token": ""
   },
   "URI": {
     "Base": ""
