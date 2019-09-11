@@ -60,7 +60,7 @@ async def test_get_container_artifacts_count():
         assert len(results.success) >= 1
         assert not results.failure
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -81,7 +81,7 @@ async def test_get_all_artifacts():
         assert len(results.success) == count
         assert not results.failure
 
-        tprint(results, top=5)  # Should return artifacts belonging to one container
+        tprint(results, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -99,7 +99,7 @@ async def test_get_one_artifact():
         assert len(results.success) == 1
         assert not results.failure
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -120,7 +120,7 @@ async def test_get_all_container_artifacts():
         assert len(results.success) == count
         assert not results.failure
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -140,7 +140,7 @@ async def test_delete_one_artifact():
         assert not results.failure
         assert results.success
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -160,7 +160,7 @@ async def test_delete_artifacts():
         assert not results.failure
         assert results.success[0]['success']
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -176,11 +176,11 @@ async def test_create_one_artifact():
         response_results, request_results = await pac.create_artifacts(container)
         # print(response_results)
 
-        # assert type(response_results) is Results
-        # assert len(request_results) == 1
-        # assert len(response_results.success) == 1
-        # assert not response_results.failure
-        # assert response_results.success[0]['success']
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 1
+        assert not response_results.failure
+        assert response_results.success[0]['success']
 
         tprint(response_results, request_results)
 
@@ -231,7 +231,7 @@ async def test_update_one_artifact():
         assert results.success
         assert results.success[0]['success']
 
-        tprint(results)  # Should return artifacts belonging to one container
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
