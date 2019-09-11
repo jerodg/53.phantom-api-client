@@ -7,12 +7,21 @@
 
 ![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
 ![python](https://img.shields.io/badge/Python-3.7/8%2B-blue.svg)
-![phantom](https://img.shields.io/badge/Phantom-4.2+-blue.svg)
+![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
 ![0%](https://img.shields.io/badge/Coverage-%25-red.svg)
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
 
-(Splunk) Phantom API client.
+# Splunk-Phantom, API client.
+Client library for Phantom's REST API.
+
+Developed for use with Phantom v4.5+, however, most functionality *should work 
+with previous versions.
+
+Developed fro use with Python3.8+, however, it should work with 3.6/7+. There is
+no guarantee that future development won't utilize 3.8+ specifc syntax.
+
+__*Not Affiliated with Splunk or Phantom__
 
 ## Installation
 ```bash
@@ -26,7 +35,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (0/24) 0%, Functions (5/103) ~4.8%
+## API Implementation, Categories (1/24) ~4.1%/Functions (11/103) ~10.7%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -37,18 +46,18 @@ __*These should match unit tests.__
     - [ ] Delete Rule
 - [ ] Apps:
     - [ ] Install App    
-- [ ] Artifacts:
+- [x] Artifacts:
     - [x] Get All Artifacts Count
     - [x] Get Container Artifacts Count
     - [x] Get All Artifacts
     - [x] Get One Artifact
     - [x] Get All Container Artifacts    
-    - [ ] Create Artifact
-    - [ ] Create Artifacts
-    - [ ] Update Artifact
-    - [ ] Update Artifacts
-    - [ ] Delete Artifact
-    - [ ] Delete Artifacts
+    - [x] Create One Artifact
+    - [x] Create Artifacts
+    - [x] Update Artifact
+    - [x] Update Artifacts
+    - [x] Delete One Artifact
+    - [x] Delete Artifacts
 - [ ] Assets:
     - [ ] Create Assets
 - [ ] Attachments:
