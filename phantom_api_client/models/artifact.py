@@ -28,7 +28,7 @@ from phantom_api_client.models.cef import Cef
 
 @dataclass
 class ArtifactRequest(Record):
-    cef: Union[Cef, None] = None  # Common Event Format
+    cef: Union[Cef, dict, None] = None  # Common Event Format
     cef_types: Union[Dict[str, List[str]], None] = None
     container_id: Union[int, None] = None
     data: Union[dict, None] = None
@@ -46,7 +46,6 @@ class ArtifactRequest(Record):
     tags: Union[List[str], str, None] = None
     type: Union[str, None] = None
     # Extras
-    request_id: str = uuid4().hex
     id: int = None
 
     def __post_init__(self):
@@ -54,7 +53,29 @@ class ArtifactRequest(Record):
             self.data = dict(sorted({k: v for k, v in self.data.items() if v is not None}.items()))
 
         if type(self.cef) is Cef:
-            self.cef = self.cef.dict
+            self.cef = self.cef.dict()
+
+        self.data = {'request_id': uuid4().hex}
 
     def update_id(self, id: int):
         self.id = id
+
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        del d['id']
+
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
