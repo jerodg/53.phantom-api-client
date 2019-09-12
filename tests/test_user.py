@@ -27,6 +27,24 @@ from phantom_api_client import PhantomApiClient
 
 
 @pytest.mark.asyncio
+async def test_get_user_count():
+    ts = time.perf_counter()
+
+    bprint('Test: Get User Count')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_user_count()
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
 async def test_get_users():
     # This needs test containers/containers created; see test_containers.py
     ts = time.perf_counter()
@@ -34,9 +52,7 @@ async def test_get_users():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_user_data()
-        ids = [k['id'] for k in results.success]
 
-        results = await pac.get_user_data()
         # print(results)
 
         assert type(results) is Results

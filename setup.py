@@ -69,7 +69,7 @@ def main() -> NoReturn:
           setup_requires=['pytest-runner'],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.7.1',
+          version='0!0.22.0',
           zip_safe=True)
 
 

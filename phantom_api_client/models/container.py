@@ -107,6 +107,10 @@ class ContainerRequest(Record):
 
         return d
 
+
+if __name__ == '__main__':
+    print(__doc__)
+
 # fixme: Don't really see a need for this.
 # @dataclass
 # class ContainerRecord(Record):

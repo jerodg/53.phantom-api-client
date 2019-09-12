@@ -145,3 +145,7 @@ class CustomFields(Record):
             d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
 
         return d
+
+
+if __name__ == '__main__':
+    print(__doc__)
