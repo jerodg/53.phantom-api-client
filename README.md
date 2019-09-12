@@ -35,7 +35,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (1/24) ~4.1%/Functions (11/103) ~10.7%
+## API Implementation, Categories (2/24) ~8.3%/Functions (22/103) ~21.3%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -77,17 +77,17 @@ __*These should match unit tests.__
 - [ ] Clustering:
     - [ ] Get Nodes
 - [ ] Containers:
-    - [ ] Get Container Count
-    - [ ] Get Container
-    - [ ] Get Containers
-    - [ ] Create Container
-    - [ ] Create Containers
-    - [ ] Update Container
-    - [ ] Update Containers
-    - [ ] Delete Container
-    - [ ] Delete Containers
-    - [ ] Get Whitelisted Users
-    - [ ] Get Whitelist Candidates (users who can view a container)
+    - [x] Get Containers Count
+    - [x] Get All Containers
+    - [x] Get One Container
+    - [x] Create One Container
+    - [x] Create Containers
+    - [x] Update Container
+    - [x] Update Containers
+    - [x] Delete Container
+    - [x] Delete Containers
+    - [x] Get Container Whitelisted Users
+    - [x] Get Whitelist Candidates (users who can view a container)
 - [ ] Custom Lists:
     - [ ] Get List
     - [ ] Create List
