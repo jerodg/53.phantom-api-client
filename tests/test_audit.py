@@ -25,7 +25,6 @@ from random import choice
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import RequestFilter
 
 
 @pytest.mark.asyncio
@@ -36,7 +35,7 @@ async def test_get_container_audit():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
-        results = await pac.get_containers(filter=RequestFilter(filter=f))
+        results = await pac.get_containers(filter=ContainerRequestFilter(filter=f))
         ids = [k['id'] for k in results.success]
 
         results = await pac.get_audit_data(subject='container', params=choice(ids))

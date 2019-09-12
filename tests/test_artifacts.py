@@ -92,7 +92,7 @@ async def test_get_one_artifact():
     bprint('Test: Get One Artifact')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_artifacts(artifact_id=6113096)
+        results = await pac.get_artifacts(artifact_id=6119877)
         # print(results)
 
         assert type(results) is Results
@@ -111,9 +111,9 @@ async def test_get_all_container_artifacts():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         # todo: Get or create random test container
-        results = await pac.get_artifact_count(container_id=120020)
+        results = await pac.get_artifact_count(container_id=119109)
         count = results.success[0]['count']
-        results = await pac.get_artifacts(container_id=120020)
+        results = await pac.get_artifacts(container_id=119109)
         # print(results)
 
         assert type(results) is Results

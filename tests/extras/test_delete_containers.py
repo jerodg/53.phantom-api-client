@@ -24,7 +24,7 @@ import pytest
 from os import getenv
 
 from base_api_client import bprint, Results, tprint
-from phantom_api_client import PhantomApiClient, RequestFilter
+from phantom_api_client import ContainerRequestFilter, PhantomApiClient
 
 
 @pytest.mark.asyncio
@@ -35,7 +35,7 @@ async def test_delete_containers() -> NoReturn:
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         # Get test containers
         f = {'_filter_name__icontains': '"test"'}
-        results = await pac.get_containers(RequestFilter(filter=f))
+        results = await pac.get_containers(ContainerRequestFilter(filter=f))
         print('results:', len(results.success))
 
         ids = [k['id'] for k in results.success]
@@ -71,7 +71,7 @@ async def test_delete_containers() -> NoReturn:
         tprint(results1, top=5)
 
         # Verify test containers have been deleted
-        results2 = await pac.get_containers(RequestFilter(filter=f))
+        results2 = await pac.get_containers(ContainerRequestFilter(filter=f))
         print('results2', results2)
         assert type(results2) is Results
         assert len(results2.success) == 0

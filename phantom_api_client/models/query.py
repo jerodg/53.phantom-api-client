@@ -55,8 +55,6 @@ class Query(Record):
     sort: Optional[str] = None
     order: Optional[str] = None
 
-    # limit: Optional[int] = None  # Not part of a standard Phantom Query
-
     def __post_init__(self):
         # todo: regex matching
         # type_opts = ['ph_user', 'artifact']
@@ -64,7 +62,7 @@ class Query(Record):
         #     raise InvalidOptionError
 
         if self.include_expensive or self.pretty:
-            self.page_size = 100
+            self.page_size = 500
 
         if self.pretty:
             self.pretty = 1
@@ -78,3 +76,21 @@ class Query(Record):
 
         if self.type and not self.type.startswith('/'):
             self.type = f'/{self.type}'
+
+
+@dataclass
+class ContainerQuery(Query):
+    _annotation_whitelist_users: Optional[Union[bool, int]] = None
+    whitelist_candidates: Optional[Union[bool, int]] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self._annotation_whitelist_users:
+            self._annotation_whitelist_users = 1
+
+        if self.whitelist_candidates:
+            self.whitelist_candidates = 1
+
+
+if __name__ == '__main__':
+    print(__doc__)
