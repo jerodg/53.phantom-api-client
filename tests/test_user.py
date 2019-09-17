@@ -24,6 +24,7 @@ from os import getenv
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
+from phantom_api_client.models import Query
 
 
 @pytest.mark.asyncio
@@ -45,18 +46,59 @@ async def test_get_user_count():
 
 
 @pytest.mark.asyncio
-async def test_get_users():
+async def test_get_one_user():
     # This needs test containers/containers created; see test_containers.py
     ts = time.perf_counter()
-    bprint('Test: Get Users')
+    bprint('Test: Get One User')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_user_data()
+        results = await pac.get_users(user_id=5)
 
         # print(results)
 
         assert type(results) is Results
-        assert len(results.success) >= 1
+        assert len(results.success) == 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_users():
+    ts = time.perf_counter()
+    bprint('Test: Get All Users')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_user_count()
+        count = results.success[0]['count']
+
+        results = await pac.get_users(query=Query(filter={'_filter_type__in': '["normal", "automation"]'}))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == count
+        assert not results.failure
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_delete_one_user():
+    # This needs test containers/containers created; see test_containers.py
+    ts = time.perf_counter()
+    bprint('Test: Delete One User')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.delete_records(ids=13, query=Query(type='ph_user'))
+
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
         assert not results.failure
 
         tprint(results)
