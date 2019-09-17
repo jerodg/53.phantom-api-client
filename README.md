@@ -35,7 +35,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (2/24) ~8.3%/Functions (22/103) ~21.3%
+## API Implementation, Categories (3/24) ~8.3%/Functions (30/116) ~21.3%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -66,7 +66,17 @@ __*These should match unit tests.__
     - [ ] Create Attachment
     - [ ] Delete Attachment
 - [ ] Audit:
-    - [] Get Audit Data
+    - [ ] Get One User Audit Data
+    - [ ] Get 'N' Users Audit Data
+    - [ ] Get One Role Audit Data
+    - [ ] Get 'N' Role Audit Data
+    - [ ] Get Authentication Audit Data
+    - [ ] Get Administration Audit Data
+    - [ ] Get One Playbook Audit Data
+    - [ ] Get 'N' Playbooks Audit Data
+    - [x] Get One Container Audit Data
+    - [x] Get 'N' Containers Audit Data
+    - [ ] Get All Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
     - [ ] Create Custom CEF
@@ -76,9 +86,11 @@ __*These should match unit tests.__
     - [ ] Delete Custom CEF
 - [ ] Clustering:
     - [ ] Get Nodes
-- [ ] Containers:
+- [x] Containers:
     - [x] Get Containers Count
+    - [x] Get Containers Count Filtered
     - [x] Get All Containers
+    - [x] Get All Containers Filtered
     - [x] Get One Container
     - [x] Create One Container
     - [x] Create Containers
@@ -151,11 +163,12 @@ __*These should match unit tests.__
     - [ ] Create Tenant
     - [ ] Update Tenant
 - [ ] Users:
-    - [ ] Get User
-    - [ ] Get User Count
-    - [ ] Get Users
-    - [ ] Create User
-    - [ ] Update User
+    - [x] Get Users Count
+    - [x] Get One User
+    - [x] Get All Users
+    - [ ] Create One User
+    - [ ] Update One User
+    - [x] Delete One User
     - [ ] Create Role/Permissions
 - [ ] Workbooks (formerly known as Case Templates):
     - [ ] Create Case Workflow Template

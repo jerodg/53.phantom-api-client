@@ -19,7 +19,7 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import re
 
@@ -39,9 +39,7 @@ class Query(Record):
         filter (dict): {'_filter_name__icontains': 'test'}
         include_expensive (bool): return all fields
         sort (str): field_name to sort on
-        order (str): asc|desc
-        limit (int): limit number of records returned
-        id (int): object_id e.g. container/artifact
+        order (str): asc|desc; default desc
 
     References:
         https://my.phantom.us/4.1/docs/rest/query
@@ -90,6 +88,37 @@ class ContainerQuery(Query):
 
         if self.whitelist_candidates:
             self.whitelist_candidates = 1
+
+
+@dataclass
+class AuditQuery(Query):
+    format: Optional[str] = None  # default json
+    start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
+    end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
+    user: Optional[Union[int, str, List[Union[int, str]]]] = None
+    role: Optional[Union[int, str, List[Union[int, str]]]] = None
+    authentication: Optional[str] = None
+    administration: Optional[str] = None
+    playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
+    container: Optional[Union[int, str, List[Union[int, str]]]] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self.user and type(self.user) is list:
+            self.user = [str(u) for u in self.user]
+            self.user = '%1E'.join(self.user)
+
+        if self.role and type(self.role) is list:
+            self.role = [str(r) for r in self.role]
+            self.role = '%1E'.join(self.role)
+
+        if self.playbook and type(self.playbook) is list:
+            self.playbook = [str(p) for p in self.playbook]
+            self.playbook = '%1E'.join(self.playbook)
+
+        if self.container and type(self.container) is list:
+            self.container = [str(c) for c in self.container]
+            self.container = '%1E'.join(self.container)
 
 
 if __name__ == '__main__':

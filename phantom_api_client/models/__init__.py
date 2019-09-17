@@ -27,4 +27,4 @@ from phantom_api_client.models.custom_fields import CustomFields
 from phantom_api_client.models.exceptions import InvalidOptionError
 from phantom_api_client.models.note import Note
 from phantom_api_client.models.pin import Pin
-from phantom_api_client.models.query import ContainerQuery, Query
+from phantom_api_client.models.query import AuditQuery, ContainerQuery, Query

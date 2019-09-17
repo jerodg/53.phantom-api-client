@@ -47,6 +47,69 @@ async def test_get_containers_count():
 
 
 @pytest.mark.asyncio
+async def test_get_containers_count_filtered():
+    ts = time.perf_counter()
+    bprint('Test: Get Containers Count Filtered')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_container_count(query=Query(type='container',
+                                                            filter={'_filter_tenant': 2}))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+
+        tprint(results)  # Should return all containers across all containers
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_containers():
+    ts = time.perf_counter()
+    bprint('Test: Get All Containers')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_container_count()
+        count = results.success[0]['count']
+
+        results = await pac.get_containers()
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == count
+        assert not results.failure
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_containers_filtered():
+    ts = time.perf_counter()
+    bprint('Test: Get All Containers Filtered')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_container_count(query=Query(type='container',
+                                                            filter={'_filter_tenant': 2}))
+        count = results.success[0]['count']
+
+        results = await pac.get_containers(query=Query(type='container',
+                                                       filter={'_filter_tenant': 2}))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == count
+        assert not results.failure
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
 async def test_get_all_containers():
     ts = time.perf_counter()
     bprint('Test: Get All Containers')
