@@ -18,7 +18,7 @@ Client library for Phantom's REST API.
 Developed for use with Phantom v4.5+, however, most functionality *should work 
 with previous versions.
 
-Developed fro use with Python3.8+, however, it should work with 3.6/7+. There is
+Developed for use with Python3.8+, however, it should work with 3.6/7+. There is
 no guarantee that future development won't utilize 3.8+ specifc syntax.
 
 __*Not Affiliated with Splunk or Phantom__
