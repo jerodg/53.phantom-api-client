@@ -5,6 +5,7 @@ name = 'pypi'
 
 [dev-packages]
 better-exceptions = "*"
+delorean = "*"
 mkdocs = "*"
 mkdocs-macros-plugin = "*"
 mkdocs-material = "*"
@@ -16,14 +17,12 @@ pytest-cov = "*"
 setuptools = "*"
 twine = "*"
 wheel = "*"
-# Need until pypi is up:
-diskcache = "*"
 
 [packages]
 aiodns = "*"
 aiohttp = "*"
+base-api-client = "*"
 cchardet = "*"
-tenacity = "*"
 toml = "*"
 ujson = "*"
 

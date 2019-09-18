@@ -7,12 +7,21 @@
 
 ![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
 ![python](https://img.shields.io/badge/Python-3.7/8%2B-blue.svg)
-![phantom](https://img.shields.io/badge/Phantom-4.2+-blue.svg)
+![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-![0%](https://img.shields.io/badge/Coverage-0%25-red.svg)
+![0%](https://img.shields.io/badge/Coverage-%25-red.svg)
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
 
-(Splunk) Phantom API client.
+# Splunk-Phantom, API client.
+Client library for Phantom's REST API.
+
+Developed for use with Phantom v4.5+, however, most functionality *should work 
+with previous versions.
+
+Developed fro use with Python3.8+, however, it should work with 3.6/7+. There is
+no guarantee that future development won't utilize 3.8+ specifc syntax.
+
+__*Not Affiliated with Splunk or Phantom__
 
 ## Installation
 ```bash
@@ -25,6 +34,149 @@ This modules' primary use-case is inheritance from other REST API clients.
 ```python
 
 ```
+
+## API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
+__*These should match unit tests.__
+- [ ] Actions:
+    - [ ] Run Action
+    - [ ] Cancel Running Action
+- [ ] Aggregation Rules:
+    - [ ] Create Rule
+    - [ ] Update Rule
+    - [ ] Delete Rule
+- [ ] Apps:
+    - [ ] Install App    
+- [x] Artifacts:
+    - [x] Get All Artifacts Count
+    - [x] Get Container Artifacts Count
+    - [x] Get All Artifacts
+    - [x] Get One Artifact
+    - [x] Get All Container Artifacts    
+    - [x] Create One Artifact
+    - [x] Create Artifacts
+    - [x] Update Artifact
+    - [x] Update Artifacts
+    - [x] Delete One Artifact
+    - [x] Delete Artifacts
+- [ ] Assets:
+    - [ ] Create Assets
+- [ ] Attachments:
+    - [ ] Get Attachment
+    - [ ] Get Attachments
+    - [ ] Create Attachment
+    - [ ] Delete Attachment
+- [ ] Audit:
+    - [ ] Get One User Audit Data
+    - [ ] Get 'N' Users Audit Data
+    - [ ] Get One Role Audit Data
+    - [ ] Get 'N' Role Audit Data
+    - [ ] Get Authentication Audit Data
+    - [ ] Get Administration Audit Data
+    - [ ] Get One Playbook Audit Data
+    - [ ] Get 'N' Playbooks Audit Data
+    - [x] Get One Container Audit Data
+    - [x] Get 'N' Containers Audit Data
+    - [ ] Get All Audit Data
+- [ ] CEF:
+    - [ ] Get Available CEFs
+    - [ ] Create Custom CEF
+    - [ ] Get Custom CEFs
+    - [ ] Get Custom CEF
+    - [ ] Update Custom CEF
+    - [ ] Delete Custom CEF
+- [ ] Clustering:
+    - [ ] Get Nodes
+- [x] Containers:
+    - [x] Get Containers Count
+    - [x] Get Containers Count Filtered
+    - [x] Get All Containers
+    - [x] Get All Containers Filtered
+    - [x] Get One Container
+    - [x] Create One Container
+    - [x] Create Containers
+    - [x] Update Container
+    - [x] Update Containers
+    - [x] Delete Container
+    - [x] Delete Containers
+    - [x] Get Container Whitelisted Users
+    - [x] Get Whitelist Candidates (users who can view a container)
+- [ ] Custom Lists:
+    - [ ] Get List
+    - [ ] Create List
+    - [ ] Update List
+    - [ ] Delete List
+- [ ] Evidence:
+    - [ ] Get Container Evidence
+    - [ ] Create Container Evidence
+    - [ ] Delete Container Evidence
+- [ ] HUD:
+    - [ ] Pin Container
+    - [ ] Update Pin
+- [ ] Indicators:
+    - [ ] Get Indicator Counts
+    - [ ] Get Top Event Labels
+    - [ ] Get Top Indicator Types
+    - [ ] Get Top Indicator Values
+    - [ ] Get Indicators
+    - [ ] Get Indicator
+    - [ ] Get Artifacts by Indicator
+    - [ ] Get Indicator Timeline by Value
+    - [ ] Get Containers by Indicator
+- [ ] Informational:
+    - [ ] Get Version
+    - [ ] Get System Info
+    - [ ] Get License
+    - [ ] Get System Health
+    - [ ] Get App Status Info
+    - [ ] Get Widget Info    
+- [ ] Notes:
+    - [ ] Create Container Note
+    - [ ] Create Containers Notes
+    - [ ] Create Artifact Note
+    - [ ] Create Task Note
+    - [ ] Update Container Note
+    - [ ] Get Container Notes
+    - [ ] Get Container Note
+    - [ ] Delete Note
+    - [ ] Get Artifact Notes
+    - [ ] Get Task Notes
+    - [ ] Search Notes
+- [ ] Playbooks:
+    - [ ] Update Playbook Status
+    - [ ] Run Playbook
+    - [ ] Cancel Running Playbook
+    - [ ] Update Source Control Repository
+- [ ] Search:
+    - [ ] Run Search
+- [ ] Severity:
+    - [ ] Get Severity's
+    - [ ] Create Severity
+    - [ ] Delete Severity
+    - [ ] Update Severity
+- [ ] Status:
+    - [ ] Get Status Labels
+    - [ ] Create Status Label
+    - [ ] Delete Status Label
+- [ ] System Settings:
+    - [ ] Update System Settings
+- [ ] Tenants:
+    - [ ] Create Tenant
+    - [ ] Update Tenant
+- [ ] Users:
+    - [x] Get Users Count
+    - [x] Get One User
+    - [x] Get All Users
+    - [ ] Create One User
+    - [ ] Update One User
+    - [x] Delete One User
+    - [ ] Create Role/Permissions
+- [ ] Workbooks (formerly known as Case Templates):
+    - [ ] Create Case Workflow Template
+    - [ ] Create Phase Object
+    - [ ] Create Task Object
+    - [ ] Add Phase Template to Workflow Template
+    - [ ] Add Task to Phase Template 
+    - [ ] Get Workbook Phases
 
 ## Performance Notes
 Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM

@@ -20,6 +20,8 @@
 [Auth]
     Username = ""
     Password = ""
+    Header = ""  # Name of header to associate with Token
+    Token = ""
 
 [URI]
     Base = ""  # Required; Should not include trailing /

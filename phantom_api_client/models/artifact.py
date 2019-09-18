@@ -24,12 +24,11 @@ from uuid import uuid4
 
 from base_api_client.models.record import Record
 from phantom_api_client.models.cef import Cef
-from phantom_api_client.models.exceptions import InvalidOptionError
 
 
 @dataclass
 class ArtifactRequest(Record):
-    cef: Union[Cef, None] = None  # Common Event Format
+    cef: Union[Cef, dict, None] = None  # Common Event Format
     cef_types: Union[Dict[str, List[str]], None] = None
     container_id: Union[int, None] = None
     data: Union[dict, None] = None
@@ -47,35 +46,40 @@ class ArtifactRequest(Record):
     tags: Union[List[str], str, None] = None
     type: Union[str, None] = None
     # Extras
-    request_id: str = uuid4().hex
     id: int = None
 
     def __post_init__(self):
-        kill_chain_opts = ['Reconnaissance',
-                           'Weaponization',
-                           'Delivery',
-                           'Exploitation',
-                           'Installation',
-                           'Command & Control',
-                           'Actions on Objectives',
-                           None]
-        if self.kill_chain not in kill_chain_opts:
-            raise InvalidOptionError('kill_chain', kill_chain_opts)
-
-        label_opts = ['event', 'net flow', 'artifact', 'network', 'test', 'mss', 'qradar-offenses', None]
-        if self.label not in label_opts:
-            raise InvalidOptionError('label', label_opts)
-
-        severity_opts = ['low', 'medium', 'high', None]
-        if self.severity not in severity_opts:
-            raise InvalidOptionError('severity', severity_opts)
-
         if self.data:
             self.data = dict(sorted({k: v for k, v in self.data.items() if v is not None}.items()))
 
         if type(self.cef) is Cef:
-            self.cef = self.cef.dict
+            self.cef = self.cef.dict()
+
+        self.data = {'request_id': uuid4().hex}
 
     def update_id(self, id: int):
-        print('update_id:', id)
         self.id = id
+
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        d = {**self.__dict__}
+        del d['id']
+
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
+
+
+if __name__ == '__main__':
+    print(__doc__)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Phantom API Client: Tests.Extras Containers
+"""Phantom API Client: Tests.Extras Update Containers Filtered
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -18,32 +18,44 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
+from typing import NoReturn
 
 import pytest
 from os import getenv
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import ContainerFilter
+from phantom_api_client.models import ContainerRequest, Query
 
 
-# todo: write delete function 😅
 @pytest.mark.asyncio
-async def test_get_containers_filtered():
+async def test_update_containers_filtered() -> NoReturn:
     ts = time.perf_counter()
 
-    bprint('Test: Get Containers')
+    bprint('Test: Update Containers Filtered')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        f = {'_filter_name__icontains': '"test"', '_filter_tenant': 2}
-        results = await pac.get_containers(ContainerFilter(filter=f))
+        results = await pac.get_container_count(query=Query(type='container',
+                                                            filter={'_filter_name__icontains': '"mcafee"',
+                                                                    '_filter_label':           '"events"'}))
+        tprint(results, top=5)
 
-        ids = len(list(set([k['id'] for k in results.success])))
-        print(f'Results: {len(results.success)} == Ids: {ids}?')
+        count = results.success[0]['count']
+
+        results = await pac.get_containers(query=Query(type='container',
+                                                       filter={'_filter_name__icontains': '"mcafee"',
+                                                               '_filter_label':           '"events"'}))
 
         assert type(results) is Results
-        assert len(results.success) >= 1
+        assert len(results.success) == count
         assert not results.failure
-        assert len(results.success) == ids  # Ensure no duplicates
+
+        tprint(results, top=5)
+
+        print('Updating Containers...')
+
+        requests = [ContainerRequest(id=i, label='mcafee') for i in [c['id'] for c in results.success]]
+
+        results = await pac.update_records(requests=requests)
 
         tprint(results, top=5)
 

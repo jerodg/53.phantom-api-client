@@ -21,11 +21,13 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 from dataclasses import dataclass
 from typing import Union
 
-from phantom_api_client.models.exceptions import InvalidOptionError
+from base_api_client import Record
 
+
+# todo: x_opts are proprietary; remove (possibly pull from phantom)e
 
 @dataclass
-class CustomFields:
+class CustomFields(Record):
     """
     References:
         https://soflokydcphat01.info53.com/admin/product_settings/eventsettings/global"""
@@ -46,71 +48,80 @@ class CustomFields:
     customer_exposure: Union[str, None] = None
 
     def __post_init__(self):
-        alert_source_opts = ['Ad-Hoc Notification',
-                             'Bricata',
-                             'Cisco-ISE',
-                             'Cisco-WIPs',
-                             'Crowdstrike',
-                             'Cylance',
-                             'Exabeam',
-                             'FireEye',
-                             'IDS-Fraud',
-                             'InvestigationMailbox',
-                             'McAfee-AV',
-                             'McAfee-HIPS',
-                             'MSSP',
-                             'Overwatch',
-                             'SecurityAwareness',
-                             'Qradar',
-                             'Phishlabs',
-                             'Test',
-                             'Ad-Hoc Notification',
-                             'Splunk',
-                             None]
-        if self.alert_source not in alert_source_opts:
-            raise InvalidOptionError('alert_source', alert_source_opts)
+        pass
+        # alert_source_opts = ['Ad-Hoc Notification',
+        #                      'Bricata',
+        #                      'Cisco-ISE',
+        #                      'Cisco-WIPs',
+        #                      'Crowdstrike',
+        #                      'Cylance',
+        #                      'Exabeam',
+        #                      'FireEye',
+        #                      'IDS-Fraud',
+        #                      'InvestigationMailbox',
+        #                      'McAfee-AV',
+        #                      'McAfee-HIPS',
+        #                      'MSSP',
+        #                      'Overwatch',
+        #                      'SecurityAwareness',
+        #                      'Qradar',
+        #                      'Phishlabs',
+        #                      'Test',
+        #                      'Ad-Hoc Notification',
+        #                      'Splunk',
+        #                      None]
+        # if self.alert_source not in alert_source_opts:
+        #     raise InvalidOptionError('alert_source', alert_source_opts)
 
-        incident_level_opts = ['1', '2', '3', 'Not Applicable', None]
-        if self.incident_level not in incident_level_opts:
-            raise InvalidOptionError('incident_Level', incident_level_opts)
+        # incident_level_opts = ['1', '2', '3', 'Not Applicable', None]
+        # if self.incident_level not in incident_level_opts:
+        #     raise InvalidOptionError('incident_Level', incident_level_opts)
 
-        incident_category_opts = ['Customer Threat: Commercial ATO',
-                                  'Customer Threat: Credential Reuse',
-                                  'Customer Threat: Unauthorized Access',
-                                  'Cyber Threat: Denial of Service',
-                                  'Cyber Threat: Exploitation',
-                                  'Cyber Threat: Malware',
-                                  'Cyber Threat: Reconnaissance',
-                                  'Insider Threat: DLP',
-                                  'Insider Threat: NAC',
-                                  'Insider Threat: Suspicious Activity',
-                                  'Insider Threat: UEBA',
-                                  'Cyber Threat: Phishing',
-                                  'Cyber Threat: Vishing',
-                                  'Cyber Threat: Phishing Redirect',
-                                  'Test',
-                                  'MSS',
-                                  None]
-        if self.incident_category not in incident_category_opts:
-            raise InvalidOptionError('incident_category', incident_category_opts)
+        # incident_category_opts = ['Customer Threat: Commercial ATO',
+        #                           'Customer Threat: Credential Reuse',
+        #                           'Customer Threat: Unauthorized Access',
+        #                           'Cyber Threat: Denial of Service',
+        #                           'Cyber Threat: Exploitation',
+        #                           'Cyber Threat: Malware',
+        #                           'Cyber Threat: Reconnaissance',
+        #                           'Insider Threat: DLP',
+        #                           'Insider Threat: NAC',
+        #                           'Insider Threat: Suspicious Activity',
+        #                           'Insider Threat: UEBA',
+        #                           'Cyber Threat: Phishing',
+        #                           'Cyber Threat: Vishing',
+        #                           'Cyber Threat: Phishing Redirect',
+        #                           'Test',
+        #                           'MSS',
+        #                           None]
+        # if self.incident_category not in incident_category_opts:
+        #     raise InvalidOptionError('incident_category', incident_category_opts)
 
-        compliance_contacted_opts = ['Yes', 'No', None]
-        if self.compliance_contacted not in compliance_contacted_opts:
-            raise InvalidOptionError('compliance_contacted', compliance_contacted_opts)
+        # compliance_contacted_opts = ['Yes', 'No', None]
+        # if self.compliance_contacted not in compliance_contacted_opts:
+        #     raise InvalidOptionError('compliance_contacted', compliance_contacted_opts)
 
-        mitigated_opts = ['Yes', 'No', 'Not Applicable', None]
-        if self.mitigated not in mitigated_opts:
-            raise InvalidOptionError('mitigated', mitigated_opts)
+        # mitigated_opts = ['Yes', 'No', 'Not Applicable', None]
+        # if self.mitigated not in mitigated_opts:
+        #     raise InvalidOptionError('mitigated', mitigated_opts)
 
-        disposition_opts = ['False Positive', 'Security Event', 'Red Team', 'Security Incident', None]
-        if self.disposition not in disposition_opts:
-            raise InvalidOptionError('disposition', disposition_opts)
+        # disposition_opts = ['False Positive', 'Security Event', 'Red Team', 'Security Incident', None]
+        # if self.disposition not in disposition_opts:
+        #     raise InvalidOptionError('disposition', disposition_opts)
 
-        customer_exposure_opts = ['Yes', 'No', None]
-        if self.customer_exposure not in customer_exposure_opts:
-            raise InvalidOptionError('customer_exposure', customer_exposure_opts)
+        # customer_exposure_opts = ['Yes', 'No', None]
+        # if self.customer_exposure not in customer_exposure_opts:
+        #     raise InvalidOptionError('customer_exposure', customer_exposure_opts)
 
-    def dict(self):
+    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
         d = {'Alert Source':         self.alert_source,
              'Resolution Summary':   self.resolution_summary,
              'Incident Level':       self.incident_level,
@@ -127,4 +138,14 @@ class CustomFields:
              'True Event Time':      self.true_event_time,
              'Customer Exposure':    self.customer_exposure}
 
-        return dict(sorted({k: v for k, v in d.items() if v is not None}.items()))
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+
+        return d
+
+
+if __name__ == '__main__':
+    print(__doc__)

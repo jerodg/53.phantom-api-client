@@ -21,9 +21,11 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 from dataclasses import dataclass
 from typing import Union
 
+from base_api_client import Record
+
 
 @dataclass
-class Cef:
+class Cef(Record):
     ApplicationProtocol: Union[str, None] = None
     act: Union[str, None] = None
     app: Union[str, None] = None
@@ -176,14 +178,3 @@ class Cef:
                 self.__dict__[k] = v
 
             del self.customCef
-
-    @property
-    def dict(self):
-        d = {k: v for k, v in self.__dict__.items() if v is not None}
-        try:
-            x = d['_in']
-            d['in'] = x
-        except KeyError:
-            pass
-
-        return dict(sorted(d.items()))
