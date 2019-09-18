@@ -83,7 +83,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#installation" tabindex="1" class="md-skip">
+      <a href="#splunk-phantom-api-client" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -225,6 +225,8 @@
     
     <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
+      
+    
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
         About
@@ -237,6 +239,8 @@
       
 <nav class="md-nav md-nav--secondary">
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">Table of contents</label>
@@ -257,8 +261,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-implementation" title="API Implementation" class="md-nav__link">
-    API Implementation
+  <a href="#api-implementation-categories-224-83functions-30116-259" title="API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%" class="md-nav__link">
+    API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
   </a>
   
 </li>
@@ -322,6 +326,8 @@
 <nav class="md-nav md-nav--secondary">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">Table of contents</label>
     <ul class="md-nav__list" data-md-scrollfix>
@@ -341,8 +347,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-implementation" title="API Implementation" class="md-nav__link">
-    API Implementation
+  <a href="#api-implementation-categories-224-83functions-30116-259" title="API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%" class="md-nav__link">
+    API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
   </a>
   
 </li>
@@ -400,8 +406,6 @@
                   <a href="https://github.com/jerodg/base-api-client/tree/gh-pages/edit/master/docs/index.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                  <h1>About</h1>
-                
                 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>1
 2
 3
@@ -412,13 +416,19 @@
 </pre></div>
 </td></tr></table>
 
-<p><img alt="platform" src="https://img.shields.io/badge/Platform-Linux/Mac/Unix/Windows-blue.svg" />
-<img alt="python" src="https://img.shields.io/badge/Python-3.8%2B-blue.svg" />
-<img alt="phantom" src="https://img.shields.io/badge/Phantom-4.2+-blue.svg" />
+<p><img alt="platform" src="https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg" />
+<img alt="python" src="https://img.shields.io/badge/Python-3.7/8%2B-blue.svg" />
+<img alt="phantom" src="https://img.shields.io/badge/Phantom-4.5+-blue.svg" />
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-<img alt="0%" src="https://img.shields.io/badge/Coverage-0%25-red.svg" />
+<img alt="0%" src="https://img.shields.io/badge/Coverage-%25-red.svg" />
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a></p>
-<p>(Splunk) Phantom API client.</p>
+<h1 id="splunk-phantom-api-client">Splunk-Phantom, API client.<a class="headerlink" href="#splunk-phantom-api-client" title="Permanent link">&para;</a></h1>
+<p>Client library for Phantom&rsquo;s REST API.</p>
+<p>Developed for use with Phantom v4.5+, however, most functionality *should work 
+with previous versions.</p>
+<p>Developed fro use with Python3.8+, however, it should work with 3.6/7+. There is
+no guarantee that future development won&rsquo;t utilize 3.8+ specifc syntax.</p>
+<p><strong>*Not Affiliated with Splunk or Phantom</strong></p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span>pip install phantom-api-client
 </pre></div>
@@ -430,46 +440,148 @@
 </pre></div>
 </td></tr></table>
 
-<h2 id="api-implementation">API Implementation<a class="headerlink" href="#api-implementation" title="Permanent link">&para;</a></h2>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> Get<ul class="task-list">
-<li class="task-list-item">
-<p><input type="checkbox" disabled/> Container(s)</p>
-<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled checked/> get Single Container</li>
-<li class="task-list-item"><input type="checkbox" disabled checked/> get All Containers</li>
-<li class="task-list-item"><input type="checkbox" disabled/> get All Containers (filtered)</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled checked/> get Container Count</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled/> update Single Container</p>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled/> update Many Containers</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Artifact(s)<ul class="task-list">
-<li class="task-list-item"><input type="checkbox" disabled/> get Single Artifact</li>
-<li class="task-list-item"><input type="checkbox" disabled/> get All Artifacts</li>
-<li class="task-list-item"><input type="checkbox" disabled/> get All Artifacts (filtered)</li>
-<li class="task-list-item"><input type="checkbox" disabled/> get Artifact Count</li>
-<li class="task-list-item"><input type="checkbox" disabled/> delete Artifact</li>
-<li class="task-list-item"><input type="checkbox" disabled/> delete Artifacts</li>
-<li class="task-list-item"><input type="checkbox" disabled/> update Artifact</li>
-<li class="task-list-item"><input type="checkbox" disabled/> update Artifacts</li>
-</ul>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled/> Update</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled/> delete Single Container</p>
-</li>
-<li class="task-list-item"><input type="checkbox" disabled/> delete Many Containers</li>
-<li class="task-list-item"><input type="checkbox" disabled/> Delete</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+<h2 id="api-implementation-categories-224-83functions-30116-259">API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%<a class="headerlink" href="#api-implementation-categories-224-83functions-30116-259" title="Permanent link">&para;</a></h2>
+<p><strong>*These should match unit tests.</strong>
+- [ ] Actions:
+    - [ ] Run Action
+    - [ ] Cancel Running Action
+- [ ] Aggregation Rules:
+    - [ ] Create Rule
+    - [ ] Update Rule
+    - [ ] Delete Rule
+- [ ] Apps:
+    - [ ] Install App  <br />
+- [x] Artifacts:
+    - [x] Get All Artifacts Count
+    - [x] Get Container Artifacts Count
+    - [x] Get All Artifacts
+    - [x] Get One Artifact
+    - [x] Get All Container Artifacts  <br />
+    - [x] Create One Artifact
+    - [x] Create Artifacts
+    - [x] Update Artifact
+    - [x] Update Artifacts
+    - [x] Delete One Artifact
+    - [x] Delete Artifacts
+- [ ] Assets:
+    - [ ] Create Assets
+- [ ] Attachments:
+    - [ ] Get Attachment
+    - [ ] Get Attachments
+    - [ ] Create Attachment
+    - [ ] Delete Attachment
+- [ ] Audit:
+    - [ ] Get One User Audit Data
+    - [ ] Get &lsquo;N&rsquo; Users Audit Data
+    - [ ] Get One Role Audit Data
+    - [ ] Get &lsquo;N&rsquo; Role Audit Data
+    - [ ] Get Authentication Audit Data
+    - [ ] Get Administration Audit Data
+    - [ ] Get One Playbook Audit Data
+    - [ ] Get &lsquo;N&rsquo; Playbooks Audit Data
+    - [x] Get One Container Audit Data
+    - [x] Get &lsquo;N&rsquo; Containers Audit Data
+    - [ ] Get All Audit Data
+- [ ] CEF:
+    - [ ] Get Available CEFs
+    - [ ] Create Custom CEF
+    - [ ] Get Custom CEFs
+    - [ ] Get Custom CEF
+    - [ ] Update Custom CEF
+    - [ ] Delete Custom CEF
+- [ ] Clustering:
+    - [ ] Get Nodes
+- [x] Containers:
+    - [x] Get Containers Count
+    - [x] Get Containers Count Filtered
+    - [x] Get All Containers
+    - [x] Get All Containers Filtered
+    - [x] Get One Container
+    - [x] Create One Container
+    - [x] Create Containers
+    - [x] Update Container
+    - [x] Update Containers
+    - [x] Delete Container
+    - [x] Delete Containers
+    - [x] Get Container Whitelisted Users
+    - [x] Get Whitelist Candidates (users who can view a container)
+- [ ] Custom Lists:
+    - [ ] Get List
+    - [ ] Create List
+    - [ ] Update List
+    - [ ] Delete List
+- [ ] Evidence:
+    - [ ] Get Container Evidence
+    - [ ] Create Container Evidence
+    - [ ] Delete Container Evidence
+- [ ] HUD:
+    - [ ] Pin Container
+    - [ ] Update Pin
+- [ ] Indicators:
+    - [ ] Get Indicator Counts
+    - [ ] Get Top Event Labels
+    - [ ] Get Top Indicator Types
+    - [ ] Get Top Indicator Values
+    - [ ] Get Indicators
+    - [ ] Get Indicator
+    - [ ] Get Artifacts by Indicator
+    - [ ] Get Indicator Timeline by Value
+    - [ ] Get Containers by Indicator
+- [ ] Informational:
+    - [ ] Get Version
+    - [ ] Get System Info
+    - [ ] Get License
+    - [ ] Get System Health
+    - [ ] Get App Status Info
+    - [ ] Get Widget Info  <br />
+- [ ] Notes:
+    - [ ] Create Container Note
+    - [ ] Create Containers Notes
+    - [ ] Create Artifact Note
+    - [ ] Create Task Note
+    - [ ] Update Container Note
+    - [ ] Get Container Notes
+    - [ ] Get Container Note
+    - [ ] Delete Note
+    - [ ] Get Artifact Notes
+    - [ ] Get Task Notes
+    - [ ] Search Notes
+- [ ] Playbooks:
+    - [ ] Update Playbook Status
+    - [ ] Run Playbook
+    - [ ] Cancel Running Playbook
+    - [ ] Update Source Control Repository
+- [ ] Search:
+    - [ ] Run Search
+- [ ] Severity:
+    - [ ] Get Severity&rsquo;s
+    - [ ] Create Severity
+    - [ ] Delete Severity
+    - [ ] Update Severity
+- [ ] Status:
+    - [ ] Get Status Labels
+    - [ ] Create Status Label
+    - [ ] Delete Status Label
+- [ ] System Settings:
+    - [ ] Update System Settings
+- [ ] Tenants:
+    - [ ] Create Tenant
+    - [ ] Update Tenant
+- [ ] Users:
+    - [x] Get Users Count
+    - [x] Get One User
+    - [x] Get All Users
+    - [ ] Create One User
+    - [ ] Update One User
+    - [x] Delete One User
+    - [ ] Create Role/Permissions
+- [ ] Workbooks (formerly known as Case Templates):
+    - [ ] Create Case Workflow Template
+    - [ ] Create Phase Object
+    - [ ] Create Task Object
+    - [ ] Add Phase Template to Workflow Template
+    - [ ] Add Task to Phase Template 
+    - [ ] Get Workbook Phases</p>
 <h2 id="performance-notes">Performance Notes<a class="headerlink" href="#performance-notes" title="Permanent link">&para;</a></h2>
 <p>Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM</p>
 <h4 id="get-containers">Get Containers<a class="headerlink" href="#get-containers" title="Permanent link">&para;</a></h4>
