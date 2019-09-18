@@ -35,7 +35,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (3/24) ~8.3%/Functions (30/116) ~21.3%
+## API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
