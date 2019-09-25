@@ -42,7 +42,7 @@ class ContainerRequest(Record):
     label: str = None  # ContainerRequest Classification
     name: str = None  # Short Friendly ContainerRequest Name
     owner_id: Union[int, str, None] = None
-    run_automation: bool = False
+    run_automation: bool = True
     sensitivity: str = 'green'
     severity: str = 'low'
     source_data_identifier: Union[str, None] = None
