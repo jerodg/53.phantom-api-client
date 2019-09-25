@@ -306,12 +306,30 @@ async def test_get_one_container_whitelist_users():
 
 
 @pytest.mark.asyncio
-async def test_get_one_container_whitelist_cadidates():
+async def test_get_one_container_whitelist_candidates():
     ts = time.perf_counter()
-    bprint('Test: Get One Container')
+    bprint('Test: Get One Container Whitelist Candidates')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(container_id=119109, query=ContainerQuery(whitelist_candidates=True))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_one_container_phases():
+    ts = time.perf_counter()
+    bprint('Test: Get One Container Phases')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(container_id=118568, query=ContainerQuery(phases=True))
         # print(results)
 
         assert type(results) is Results

@@ -35,7 +35,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
+## API Implementation, Categories (2/24) ~8.3%/Functions (31/117) ~26.5%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -98,6 +98,7 @@ __*These should match unit tests.__
     - [x] Update Containers
     - [x] Delete Container
     - [x] Delete Containers
+    - [x] Get Container Phases
     - [x] Get Container Whitelisted Users
     - [x] Get Whitelist Candidates (users who can view a container)
 - [ ] Custom Lists:

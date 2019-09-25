@@ -80,6 +80,7 @@ class Query(Record):
 class ContainerQuery(Query):
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None
+    phases: Optional[Union[bool, int]] = None
 
     def __post_init__(self):
         super().__post_init__()
@@ -88,6 +89,9 @@ class ContainerQuery(Query):
 
         if self.whitelist_candidates:
             self.whitelist_candidates = 1
+
+        if self.phases:
+            self.phases = 1
 
 
 @dataclass
