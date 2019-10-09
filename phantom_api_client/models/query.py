@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Phantom API Client: Models.Filter
+"""Phantom API Client: Models.Query
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -18,14 +18,12 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
+import datetime as dt
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-import re
-
 from base_api_client.models.record import Record
-
-CARE = re.compile(r'container/\d+/artifacts')
+from delorean import Delorean, parse
 
 
 @dataclass
@@ -81,6 +79,9 @@ class ContainerQuery(Query):
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None
     phases: Optional[Union[bool, int]] = None
+    date_filter_start: Optional[Union[Delorean, str, None]] = None  # YYYY-MM-DDTHH:MM:SS.ffffff
+    date_filter_end: Optional[Union[Delorean, str, None]] = None
+    date_filter_field: Optional[str] = None  # One of:
 
     def __post_init__(self):
         super().__post_init__()
@@ -92,6 +93,55 @@ class ContainerQuery(Query):
 
         if self.phases:
             self.phases = 1
+
+        if self.date_filter_start:
+            self.date_filter_start = parse(self.date_filter_start, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_end:
+            self.date_filter_end = parse(self.date_filter_end, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_start and not self.date_filter_end:
+            self.date_filter_end = Delorean(timezone='UTC')
+
+        if self.date_filter_end and not self.date_filter_start:
+            self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
+
+    def dict(self, d: dict = None, sort_order: str = None, cleanup: bool = True) -> dict:
+        """
+        Args:
+            d (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+            cleanup (Optional[bool]):
+
+        Returns:
+            d (dict):"""
+        if not d:
+            d = self.__dict__
+
+        try:
+            del d['phases']
+        except KeyError:
+            pass
+        try:
+            del d['date_filter_start']
+        except KeyError:
+            pass
+        try:
+            del d['date_filter_end']
+        except KeyError:
+            pass
+        try:
+            del d['date_filter_field']
+        except KeyError:
+            pass
+
+        if cleanup:
+            d = {k: v for k, v in d.items() if v is not None}
+
+        if sort_order:
+            d = sorted(d, key=d.__getitem__, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return d
 
 
 @dataclass

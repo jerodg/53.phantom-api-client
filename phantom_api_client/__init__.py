@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Base API Client: Init
+"""Phantom API Client: Init
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
