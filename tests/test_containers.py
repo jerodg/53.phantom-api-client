@@ -20,9 +20,9 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
 
 import pytest
+from base_api_client import bprint, Results, tprint
 from os import getenv
 
-from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery, Query
 from tests.extras.generate_objects import generate_container
@@ -70,11 +70,11 @@ async def test_get_all_containers():
     ts = time.perf_counter()
     bprint('Test: Get All Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
         results = await pac.get_container_count()
         count = results.success[0]['count']
 
-        results = await pac.get_containers()
+        results = await pac.get_containers(query=ContainerQuery())
         # print(results)
 
         assert type(results) is Results
@@ -110,19 +110,17 @@ async def test_get_all_containers_filtered():
 
 
 @pytest.mark.asyncio
-async def test_get_all_containers():
+async def test_get_all_containers_date_filtered():
     ts = time.perf_counter()
-    bprint('Test: Get All Containers')
+    bprint('Test: Get All Containers Date Filtered')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_container_count()
-        count = results.success[0]['count']
-
-        results = await pac.get_containers()
+        results = await pac.get_containers(query=ContainerQuery(date_filter_end='2019-07-01',
+                                                                date_filter_field='create_time'))
         # print(results)
 
         assert type(results) is Results
-        assert len(results.success) == count
+        assert len(results.success) >= 1
         assert not results.failure
 
         tprint(results, top=5)
@@ -328,8 +326,8 @@ async def test_get_one_container_phases():
     ts = time.perf_counter()
     bprint('Test: Get One Container Phases')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_containers(container_id=118568, query=ContainerQuery(phases=True))
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
+        results = await pac.get_containers(container_id=151986, query=ContainerQuery(phases=True))
         # print(results)
 
         assert type(results) is Results

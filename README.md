@@ -35,7 +35,10 @@ This modules' primary use-case is inheritance from other REST API clients.
 
 ```
 
-## API Implementation, Categories (2/24) ~8.3%/Functions (31/117) ~26.5%
+## Special Features (Not Offered by REST API)
+- [ ] Get containers; Filtered by Date-Range
+
+## API Implementation, Categories (2/24) ~8.3%, Functions (31/117) ~26.5%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -233,6 +236,18 @@ More than 100 simultaneous connections/queries results in missing records.
 ## Documentation
 [GitHub Pages](https://jerodg.github.io/phantom-api-client/)
 - Work in Process
+
+## Known Issues
+Mass deleting records quits early with timeout error. It would seem the more 
+records that are being deleted adds an exponential increase in wait between 
+deletes. So far in testing >= 47 (254) 114 at once results in timeout-error.
+
+
+Phantom v4.2 and earlier has completely broken pagination. You will receive 
+duplicate and missing records. You should set the query filter 'page_size' to 
+a number greater than the max expected results in order to receive all records 
+in a single page.
+
 
 ## License
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>

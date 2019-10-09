@@ -47,12 +47,7 @@ def main() -> NoReturn:
           description='Phantom API Client Library',
           entry_points={'console_scripts': []},
           include_package_data=True,
-          install_requires=['aiodns',
-                            'aiohttp',
-                            'base-api-client',
-                            'cchardet',
-                            'toml',
-                            'ujson'],
+          install_requires=['base-api-client', 'delorean'],
           keywords='phantom api client rest',
           license='Server Side Public License (SSPL)',
           long_description_content_type='text/markdown',
@@ -69,7 +64,7 @@ def main() -> NoReturn:
           setup_requires=['pytest-runner'],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.31.0',
+          version='0!0.31.3',
           zip_safe=True)
 
 

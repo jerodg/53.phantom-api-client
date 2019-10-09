@@ -24,12 +24,11 @@ from typing import Any, List, NoReturn, Optional, Tuple, Union
 from uuid import uuid4
 
 from base_api_client import BaseApiClient, Results
+from delorean import parse
+
 from phantom_api_client.models import ArtifactRequest, AuditQuery, ContainerQuery, ContainerRequest, InvalidOptionError, Query
 
 logger = logging.getLogger(__name__)
-
-
-# todo: test_mode (revert any changes made after running)
 
 
 class PhantomApiClient(BaseApiClient):
@@ -52,6 +51,22 @@ class PhantomApiClient(BaseApiClient):
 
     async def __aexit__(self, exc_type: None, exc_val: None, exc_tb: None) -> NoReturn:
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
+
+    async def __date_filter(self, query: Union[Query, ContainerQuery], results: Results) -> Results:
+        # todo: finish testing
+        containers = []
+        for result in results.success:
+            st = parse(result[query.date_filter_field], dayfirst=False)
+
+            if query.date_filter_start <= st <= query.date_filter_end:
+                containers.append(result)
+
+        print(f'Found {len(containers)}, filtered containers.')
+        # print(*containers, sep='\n')
+
+        r = results
+        r.success = containers
+        return r
 
     async def get_artifact_count(self, container_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
         """
@@ -97,13 +112,6 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)
         """
-        if not artifact_id:
-            page_limit = (await self.get_artifact_count(container_id=container_id, query=query)).success[0]['num_pages']
-        else:  # When we're getting a single artifact we can skip paging
-            page_limit = 1
-
-        logger.debug(f'Getting artifact(s)...')
-
         if container_id:
             t = f'container/{container_id}/artifacts'
         elif artifact_id:
@@ -115,6 +123,13 @@ class PhantomApiClient(BaseApiClient):
             query = Query(type=t)
         elif not query.type:
             query.type = t
+
+        if not artifact_id:
+            page_limit = (await self.get_artifact_count(container_id=container_id, query=query)).success[0]['num_pages']
+        else:  # When we're getting a single artifact we can skip paging
+            page_limit = 1
+
+        logger.debug(f'Getting artifact(s)...')
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.type,
@@ -164,7 +179,7 @@ class PhantomApiClient(BaseApiClient):
 
         return results, containers
 
-    async def get_container_count(self, container_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
+    async def get_container_count(self, query: Optional[ContainerQuery] = None) -> Results:
         """
         Performs a single page query to get the 'results_count' & 'num_paqges' based on specified Query.
         Args:
@@ -175,9 +190,9 @@ class PhantomApiClient(BaseApiClient):
             results (Results)
         """
         if not query:
-            query = Query(type='container' if not container_id else f'container/{container_id}',
-                          page_size=1,
-                          page=0)
+            query = ContainerQuery(type='container',
+                                   page_size=1,
+                                   page=0)
 
         logger.debug(f'Getting container count...')
 
@@ -198,6 +213,8 @@ class PhantomApiClient(BaseApiClient):
         Can retrieve:
             - All Containers
             - A single container
+                - Phase data
+                - Whitelist candidates (Users permitted to access the container)
         Args:
             container_id (Optional[int]):
             query (Optional[Query]):
@@ -205,18 +222,14 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)
         """
-        if not container_id:
-            page_limit = (await self.get_container_count(query=query)).success[0]['num_pages']
-        else:  # When we're getting a single container we can skip paging
-            page_limit = 1
-
-        logger.debug(f'Getting container(s)...')
-
-        if query.whitelist_candidates:
-            wlp = '/permitted_users'
-        elif query.phases:
-            wlp = '/phases'
-        else:
+        try:
+            if query.whitelist_candidates:
+                wlp = '/permitted_users'
+            elif query.phases:
+                wlp = '/phases'
+            else:
+                wlp = ''
+        except AttributeError:
             wlp = ''
 
         if container_id:
@@ -224,10 +237,18 @@ class PhantomApiClient(BaseApiClient):
         else:
             t = '/container'
 
+        # todo: extras should be removed from query; change t to ep and use it directly below
         if not query:
             query = ContainerQuery(type=t)
         elif not query.type:
             query.type = t
+
+        if not container_id:
+            page_limit = (await self.get_container_count(query=query)).success[0]['num_pages']
+        else:  # When we're getting a single container we can skip paging
+            page_limit = 1
+
+        logger.debug(f'Getting container(s) {"phases" if wlp == "/phases" else ""}...')
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.type,
@@ -249,7 +270,12 @@ class PhantomApiClient(BaseApiClient):
         elif wlp == '/phases':
             data_key = 'data'
 
-        return await self.process_results(results, data_key)
+        processed_results = await self.process_results(results, data_key)
+
+        if query.date_filter_start or query.date_filter_end:
+            processed_results = await self.__date_filter(query, processed_results)
+
+        return processed_results
 
     async def create_containers(self, containers: Union[List[ContainerRequest], ContainerRequest]) -> Tuple[Results, Any]:
         # todo: handle revert_failure
@@ -298,13 +324,6 @@ class PhantomApiClient(BaseApiClient):
         return await self.process_results(results)
 
     async def get_users(self, user_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
-        if not user_id:
-            page_limit = (await self.get_user_count(query=query)).success[0]['num_pages']
-        else:  # When we're getting a single user we can skip paging
-            page_limit = 1
-
-        logger.debug(f'Getting user(s)...')
-
         if user_id:
             t = f'/ph_user/{user_id}'
         else:
@@ -314,6 +333,13 @@ class PhantomApiClient(BaseApiClient):
             query = Query(type=t)
         elif not query.type:
             query.type = t
+
+        if not user_id:
+            page_limit = (await self.get_user_count(query=query)).success[0]['num_pages']
+        else:  # When we're getting a single user we can skip paging
+            page_limit = 1
+
+        logger.debug(f'Getting user(s)...')
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.type,
@@ -374,6 +400,8 @@ class PhantomApiClient(BaseApiClient):
             results (Results)
         """
         logger.debug(f'Deleting {query.type}, record(s)...')
+        # todo: Might need to add delay between deletes
+        self.sem = asyncio.Semaphore(3)  # Deletes need to be done more slowly.
 
         if not type(ids) is list:
             ids = [ids]
@@ -385,6 +413,8 @@ class PhantomApiClient(BaseApiClient):
         results = Results(data=await asyncio.gather(*tasks))
 
         logger.debug('-> Complete.')
+
+        self.sem = asyncio.Semaphore(self.SEM)
 
         return await self.process_results(results)
 
