@@ -22,8 +22,9 @@ import datetime as dt
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from base_api_client.models.record import Record
 from delorean import Delorean, parse
+
+from base_api_client.models.record import Record
 
 
 @dataclass
@@ -42,9 +43,8 @@ class Query(Record):
     References:
         https://my.phantom.us/4.1/docs/rest/query
     """
-    type: Optional[str] = None
     page: Optional[int] = None
-    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore)
+    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
     pretty: Optional[Union[bool, int]] = None
     filter: Optional[Union[dict, None]] = None  # Gets converted to standard Phantom filters in __post_init__
     include_expensive: Optional[Union[bool, int]] = None
@@ -69,9 +69,6 @@ class Query(Record):
         if self.filter:
             self.load(**self.filter)
             del self.filter
-
-        if self.type and not self.type.startswith('/'):
-            self.type = f'/{self.type}'
 
 
 @dataclass
