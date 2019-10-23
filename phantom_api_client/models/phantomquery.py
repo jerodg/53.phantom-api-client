@@ -22,13 +22,14 @@ import datetime as dt
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
+from copy import deepcopy
 from delorean import Delorean, parse
 
-from base_api_client.models.record import Record
+from base_api_client.models import Record, sort_dict
 
 
 @dataclass
-class Query(Record):
+class PhantomQuery(Record):
     """
     Attributes:
         type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node|ph_user
@@ -44,7 +45,7 @@ class Query(Record):
         https://my.phantom.us/4.1/docs/rest/query
     """
     page: Optional[int] = None
-    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
+    page_size: Optional[int] = 100000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
     pretty: Optional[Union[bool, int]] = None
     filter: Optional[Union[dict, None]] = None  # Gets converted to standard Phantom filters in __post_init__
     include_expensive: Optional[Union[bool, int]] = None
@@ -52,11 +53,6 @@ class Query(Record):
     order: Optional[str] = None
 
     def __post_init__(self):
-        # todo: regex matching
-        # type_opts = ['ph_user', 'artifact']
-        # if self.type not in type_opts:
-        #     raise InvalidOptionError
-
         if self.include_expensive or self.pretty:
             self.page_size = 500
 
@@ -72,7 +68,68 @@ class Query(Record):
 
 
 @dataclass
-class ContainerQuery(Query):
+class ArtifactQuery(PhantomQuery):
+    artifact_id: Optional[int] = None
+
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
+
+        try:
+            del dct['artifact_id']
+        except KeyError:
+            pass
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
+
+
+@dataclass
+class AuditQuery(PhantomQuery):
+    format: Optional[str] = None  # default json
+    start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
+    end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
+    user: Optional[Union[int, str, List[Union[int, str]]]] = None
+    role: Optional[Union[int, str, List[Union[int, str]]]] = None
+    authentication: Optional[str] = None
+    administration: Optional[str] = None
+    playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
+    container: Optional[Union[int, str, List[Union[int, str]]]] = None
+
+    def __post_init__(self):
+        if self.user and type(self.user) is list:
+            self.user = [str(u) for u in self.user]
+            self.user = '%1E'.join(self.user)
+
+        if self.role and type(self.role) is list:
+            self.role = [str(r) for r in self.role]
+            self.role = '%1E'.join(self.role)
+
+        if self.playbook and type(self.playbook) is list:
+            self.playbook = [str(p) for p in self.playbook]
+            self.playbook = '%1E'.join(self.playbook)
+
+        if self.container and type(self.container) is list:
+            self.container = [str(c) for c in self.container]
+            self.container = '%1E'.join(self.container)
+
+
+@dataclass
+class ContainerQuery(PhantomQuery):
+    container_id: Optional[Union[int, List[int]]] = None
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None
     phases: Optional[Union[bool, int]] = None
@@ -103,73 +160,50 @@ class ContainerQuery(Query):
         if self.date_filter_end and not self.date_filter_start:
             self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
 
-    def dict(self, d: dict = None, sort_order: str = None, cleanup: bool = True) -> dict:
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
         Args:
-            d (Optional[dict]):
-            sort_order (Optional[str]): ASC | DESC
             cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
 
         Returns:
-            d (dict):"""
-        if not d:
-            d = self.__dict__
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
 
         try:
-            del d['phases']
+            del dct['phases']
         except KeyError:
             pass
+
         try:
-            del d['date_filter_start']
+            del dct['container_id']
         except KeyError:
             pass
+
         try:
-            del d['date_filter_end']
+            del dct['date_filter_start']
         except KeyError:
             pass
+
         try:
-            del d['date_filter_field']
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
         except KeyError:
             pass
 
         if cleanup:
-            d = {k: v for k, v in d.items() if v is not None}
+            dct = {k: v for k, v in dct.items() if v is not None}
 
         if sort_order:
-            d = sorted(d, key=d.__getitem__, reverse=True if sort_order.lower() == 'desc' else False)
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
-        return d
-
-
-@dataclass
-class AuditQuery(Query):
-    format: Optional[str] = None  # default json
-    start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
-    end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
-    user: Optional[Union[int, str, List[Union[int, str]]]] = None
-    role: Optional[Union[int, str, List[Union[int, str]]]] = None
-    authentication: Optional[str] = None
-    administration: Optional[str] = None
-    playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
-    container: Optional[Union[int, str, List[Union[int, str]]]] = None
-
-    def __post_init__(self):
-        super().__post_init__()
-        if self.user and type(self.user) is list:
-            self.user = [str(u) for u in self.user]
-            self.user = '%1E'.join(self.user)
-
-        if self.role and type(self.role) is list:
-            self.role = [str(r) for r in self.role]
-            self.role = '%1E'.join(self.role)
-
-        if self.playbook and type(self.playbook) is list:
-            self.playbook = [str(p) for p in self.playbook]
-            self.playbook = '%1E'.join(self.playbook)
-
-        if self.container and type(self.container) is list:
-            self.container = [str(c) for c in self.container]
-            self.container = '%1E'.join(self.container)
+        return dct
 
 
 if __name__ == '__main__':

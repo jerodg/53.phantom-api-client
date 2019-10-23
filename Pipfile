@@ -35,9 +35,17 @@ pytest-cov = "*"
 setuptools = "*"
 twine = "*"
 wheel = "*"
+#temp
+aiodns = "*"
+aiohttp = "*"
+cchardet = "*"
+diskcache = "*"
+python-rapidjson = "*"
+tenacity = "*"
+toml = "*"
 
 [packages]
-base-api-client = "*"
+#base-api-client = "*"
 delorean = "*"
 
 [requires]

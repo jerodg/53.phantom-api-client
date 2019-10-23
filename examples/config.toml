@@ -29,9 +29,16 @@
 [Options]
     CAPath = ""  # Full path to Certificate Authority file
     VerifySSL = true
+    Debug = false
+    SEM = 15
+    Content_Type = "application/json; charset=utf-8"
 
 [Proxy]  # Optional
     URI = ""
     Port = ""
     Username = ""
     Password = ""
+
+[Cache]
+    Path = ""  # Full-path to cache folder
+    Type = ""  # cache|fanout_cache|deque|indexb

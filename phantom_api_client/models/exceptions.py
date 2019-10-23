@@ -17,10 +17,14 @@ copies or substantial portions of the Software.
 
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
+import logging
+from typing import Union
+
+logger = logging.getLogger(__name__)
 
 
 class InvalidOptionError(Exception):
-    def __init__(self, name: str, message: list):
+    def __init__(self, name: str, message: Union[str, list]):
         super().__init__(message)
         self.name = name
         self.message = message
@@ -30,11 +34,19 @@ class InvalidOptionError(Exception):
             msg = '\n'.join(self.message)
         else:
             msg = str(self.message)
-        return f'\nInvalid Option for {self.name}; should be one of:\n{msg}'
+
+        logger.error(f'Invalid Option for {self.name}; should be one of:\n{msg}')
 
     def __repr__(self):
         if type(self.message) is list:
             msg = '\n'.join(self.message)
         else:
             msg = str(self.message)
-        return f'\nInvalid Option for {self.name}; should be one of:\n{msg}'
+
+        logger.error(f'\nInvalid Option for {self.name}; should be one of:\n{msg}')
+
+
+class InvalidCombinationError(Exception):
+    def __init__(self, ):
+        pass
+        # tood: research custom exceptions better
