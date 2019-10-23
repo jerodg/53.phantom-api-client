@@ -21,10 +21,11 @@ import time
 
 import pytest
 from os import getenv
+from random import choice
 
 from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import Query
+from phantom_api_client.models import ContainerQuery, Query
 from tests.extras.generate_objects import generate_container
 
 
@@ -52,8 +53,10 @@ async def test_get_container_artifacts_count():
     bprint('Test: Get Container Artifacts Count')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        # todo: Get or create random test container
-        results = await pac.get_artifact_count(container_id=120020)
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['id'] for c in results.success]
+
+        results = await pac.get_artifact_count(container_id=choice(ids))
         # print(results)
 
         assert type(results) is Results
@@ -72,7 +75,10 @@ async def test_get_all_artifacts():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_artifact_count()
-        count = results.success[0]['count']
+        try:
+            count = results.success[0]['count']
+        except IndexError:
+            count = 0
 
         results = await pac.get_artifacts()
         # print(results)
@@ -92,7 +98,13 @@ async def test_get_one_artifact():
     bprint('Test: Get One Artifact')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_artifacts(artifact_id=6119877)
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['id'] for c in results.success]
+
+        results = await pac.get_artifacts(container_id=choice(ids))
+        ids = [a['id'] for a in results.success]
+
+        results = await pac.get_artifacts(artifact_id=choice(ids))
         # print(results)
 
         assert type(results) is Results
@@ -110,7 +122,6 @@ async def test_get_all_container_artifacts():
     bprint('Test: Get All Container Artifacts')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        # todo: Get or create random test container
         results = await pac.get_artifact_count(container_id=119109)
         count = results.success[0]['count']
         results = await pac.get_artifacts(container_id=119109)
@@ -125,14 +136,24 @@ async def test_get_all_container_artifacts():
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
+# todo: test below
+
 @pytest.mark.asyncio
 async def test_delete_one_artifact():
     ts = time.perf_counter()
     bprint('Test: Delete One Artifact')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        # todo: Get or create random test container
-        results = await pac.delete_records(ids=[6113092], query=Query(type='artifact'))
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['id'] for c in results.success]
+        cid = choice(ids)
+
+        results = await pac.get_artifacts(container_id=cid)
+        ids = [a['id'] for a in results.success]
+
+        results = await pac.get_artifacts(artifact_id=choice(ids))
+
+        results = await pac.delete_records(ids=[6113092], query=Query())
         # print(results)
 
         assert type(results) is Results

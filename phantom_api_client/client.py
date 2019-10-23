@@ -23,19 +23,18 @@ import logging
 from typing import Any, List, NoReturn, Optional, Tuple, Union
 from uuid import uuid4
 
-from base_api_client import BaseApiClient, Results
 from delorean import parse
 
-from phantom_api_client.models import ArtifactRequest, AuditQuery, ContainerQuery, ContainerRequest, InvalidOptionError, Query
+from base_api_client import BaseApiClient, Results
+from phantom_api_client.models import *
 
 logger = logging.getLogger(__name__)
 
 
 class PhantomApiClient(BaseApiClient):
     """Phantom API Client"""
-    SEM: int = 15  # This defines the number of parallel async requests to make.
 
-    def __init__(self, cfg: Union[str, dict], sem: Optional[int] = None):
+    def __init__(self, cfg: Union[str, dict]):
         """Initializes Class
 
         Args:
@@ -44,7 +43,7 @@ class PhantomApiClient(BaseApiClient):
                 config.* in the examples folder for reference.
             sem (Optional[int]): An integer that defines the number of parallel
                 requests to make."""
-        BaseApiClient.__init__(self, cfg=cfg, sem=sem or self.SEM)
+        BaseApiClient.__init__(self, cfg=cfg)
 
     async def __aenter__(self):
         return self
@@ -52,23 +51,24 @@ class PhantomApiClient(BaseApiClient):
     async def __aexit__(self, exc_type: None, exc_val: None, exc_tb: None) -> NoReturn:
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
 
-    async def __date_filter(self, query: Union[Query, ContainerQuery], results: Results) -> Results:
-        # todo: finish testing
-        containers = []
-        for result in results.success:
-            st = parse(result[query.date_filter_field], dayfirst=False)
+    @staticmethod
+    async def __date_filter(query: Union[ContainerQuery], results: Results) -> Results:
+        """Date Filter
+           - Filters Results by date
 
-            if query.date_filter_start <= st <= query.date_filter_end:
-                containers.append(result)
+        Args:
+            query (Union[ContainerQuery]):
+            results (Results):
 
-        print(f'Found {len(containers)}, filtered containers.')
-        # print(*containers, sep='\n')
+        Returns:
+            results (Results):
+        """
+        results.success = [r for r in results.success if query.date_filter_start <=
+                           parse(r[query.date_filter_field], dayfirst=False) <= query.date_filter_end]
+        return results
 
-        r = results
-        r.success = containers
-        return r
-
-    async def get_artifact_count(self, container_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
+    async def get_artifact_count(self, container_id: Optional[int] = None,
+                                 query: Optional[ArtifactQuery] = ArtifactQuery(page=0, page_size=1)) -> Results:
         """
         Performs a single page query to get the 'results_count' & 'num_paqges' based on specified Query.
         Args:
@@ -78,27 +78,25 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)
         """
-        if not query:
-            query = Query(type='artifact' if not container_id else f'container/{container_id}/artifacts',
-                          page_size=1,
-                          page=0)
-
         logger.debug(f'Getting artifact count...')
 
+        if container_id:
+            ep = f'/container/{container_id}/artifacts'
+        else:
+            ep = '/artifact'
+
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
+                                                  end_point=ep,
                                                   request_id=uuid4().hex,
                                                   params=query.dict()))]
 
-        results = Results(data=await asyncio.gather(*tasks))
-
         logger.debug('-> Complete.')
 
-        return await self.process_results(results)
+        return await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
     async def get_artifacts(self, artifact_id: Optional[int] = None,
                             container_id: Optional[int] = None,
-                            query: Optional[Query] = None) -> Results:
+                            query: Optional[ArtifactQuery] = ArtifactQuery()) -> Results:
         """
         Can retrieve:
             - All artifacts
@@ -113,16 +111,11 @@ class PhantomApiClient(BaseApiClient):
             results (Results)
         """
         if container_id:
-            t = f'container/{container_id}/artifacts'
+            ep = f'/container/{container_id}/artifacts'
         elif artifact_id:
-            t = f'artifact/{artifact_id}'
+            ep = f'/artifact/{artifact_id}'
         else:
-            t = 'artifact'
-
-        if not query:
-            query = Query(type=t)
-        elif not query.type:
-            query.type = t
+            ep = '/artifact'
 
         if not artifact_id:
             page_limit = (await self.get_artifact_count(container_id=container_id, query=query)).success[0]['num_pages']
@@ -132,7 +125,7 @@ class PhantomApiClient(BaseApiClient):
         logger.debug(f'Getting artifact(s)...')
 
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
+                                                  end_point=ep,
                                                   request_id=uuid4().hex,
                                                   params={**query.dict(), 'page': i}))
                  for i in range(0, page_limit)]
@@ -145,83 +138,73 @@ class PhantomApiClient(BaseApiClient):
 
     async def create_artifacts(self, containers: Union[List[ContainerRequest], ContainerRequest]) -> Tuple[
         Results, List[ContainerRequest]]:
-        # if type(containers) is not list:
-        #     containers = [containers]
-
         # todo: handle failure (already exists?)
-        # print('containers:', containers, type(containers))
-        # print(containers[0].containers)
         logger.debug('Creating artifact(s)...')
         if type(containers) is not list:
             containers = [containers]
 
-        if type(containers[0]) is ContainerRequest:
-            tasks = [asyncio.create_task(self.request(method='post',
-                                                      end_point='/artifact',
-                                                      request_id=a.data['request_id'],
-                                                      json=a.dict())) for x in containers for a in x.artifacts]
-        else:  # ArtifactRequest
-            tasks = [asyncio.create_task(self.request(method='post',
-                                                      end_point='/artifact',
-                                                      request_id=a.data['request_id'],
-                                                      json=a.dict())) for a in containers]
+        # if type(containers[0]) is ContainerRequest:
+        tasks = [asyncio.create_task(self.request(method='post',
+                                                  end_point='/artifact',
+                                                  request_id=a.data['request_id'],
+                                                  json=a.dict())) for x in containers for a in x.artifacts]
+        # else:  # ArtifactRequest
+        #     tasks = [asyncio.create_task(self.request(method='post',
+        #                                               end_point='/artifact',
+        #                                               request_id=a.data['request_id'],
+        #                                               json=a.dict())) for a in containers]
 
         results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
         [a.update_id(next((_['id'] for _ in results.success if _['request_id'] == a.data['request_id']), None))
          for x in containers for a in x.artifacts]
 
-        logger.debug('-> Complete.')
-
         for result in results.success:
             result['artifact_id'] = result['id']
             del result['id']
 
+        logger.debug('-> Complete.')
+
         return results, containers
 
-    async def get_container_count(self, query: Optional[ContainerQuery] = None) -> Results:
+    async def get_record_count(self, query: Union[ArtifactQuery, AuditQuery, ContainerQuery]) -> Results:
         """
         Performs a single page query to get the 'results_count' & 'num_paqges' based on specified Query.
         Args:
-            container_id (Optional[int]):
-            query (Optional[Query]):
+            query (Optional[ContainerQuery]):
 
         Returns:
             results (Results)
         """
-        if not query:
-            query = ContainerQuery(type='container',
-                                   page_size=1,
-                                   page=0)
+        logger.debug(f'Getting {type(query)} record count...')
 
-        logger.debug(f'Getting container count...')
+        if type(query) == ArtifactQuery:
+            ep = '/artifact'
+        elif type(query) == AuditQuery:
+            ep = '/audit'
+        elif type(query) == ContainerQuery:
+            ep = '/container'
+        else:
+            raise InvalidOptionError('get_record_count()', ['ArtifactQuery', 'AuditQuery', 'ContainerQuery'])
+
+        query.page = 0
+        query.page_size = 1
 
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
+                                                  end_point=ep,
                                                   request_id=uuid4().hex,
                                                   params=query.dict()))]
 
-        results = Results(data=await asyncio.gather(*tasks))
-
         logger.debug('-> Complete.')
+        return await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
-        return await self.process_results(results)
-
-    async def get_containers(self, container_id: Optional[int] = None,
-                             query: Optional[Union[ContainerQuery, Query]] = None) -> Results:
+    async def get_containers(self, query: Optional[ContainerQuery] = ContainerQuery()) -> Results:
         """
-        Can retrieve:
-            - All Containers
-            - A single container
-                - Phase data
-                - Whitelist candidates (Users permitted to access the container)
         Args:
-            container_id (Optional[int]):
-            query (Optional[Query]):
+            query (ContainerQuery):
 
         Returns:
-            results (Results)
-        """
+            results (Results)"""
         try:
             if query.whitelist_candidates:
                 wlp = '/permitted_users'
@@ -232,35 +215,31 @@ class PhantomApiClient(BaseApiClient):
         except AttributeError:
             wlp = ''
 
-        if container_id:
-            t = f'/container/{container_id}{wlp}'
+        if query.container_id:
+            if type(query.container_id) is list:
+                if wlp:
+                    raise InvalidCombinationError
+                query._filter_id__in = str(query.container_id)
+                ep = '/container'
+            else:
+                ep = f'/container/{query.container_id}{wlp}'
         else:
-            t = '/container'
+            ep = '/container'
 
-        # todo: extras should be removed from query; change t to ep and use it directly below
-        if not query:
-            query = ContainerQuery(type=t)
-        elif not query.type:
-            query.type = t
-
-        if not container_id:
-            page_limit = (await self.get_container_count(query=query)).success[0]['num_pages']
+        if not query.container_id:
+            page_limit = (await self.get_record_count(query=query)).success[0]['num_pages']
         else:  # When we're getting a single container we can skip paging
             page_limit = 1
 
         logger.debug(f'Getting container(s) {"phases" if wlp == "/phases" else ""}...')
 
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
+                                                  end_point=ep,
                                                   request_id=uuid4().hex,
                                                   params={**query.dict(), 'page': i}))
                  for i in range(0, page_limit)]
 
-        results = Results(data=await asyncio.gather(*tasks))
-
-        logger.debug('-> Complete.')
-
-        if container_id:
+        if query.container_id and not type(query.container_id) is list:
             data_key = None
         else:
             data_key = 'data'
@@ -270,12 +249,14 @@ class PhantomApiClient(BaseApiClient):
         elif wlp == '/phases':
             data_key = 'data'
 
-        processed_results = await self.process_results(results, data_key)
+        results = await self.process_results(Results(data=await asyncio.gather(*tasks)), data_key)
 
-        if query.date_filter_start or query.date_filter_end:
-            processed_results = await self.__date_filter(query, processed_results)
+        if query.date_filter_field:
+            results = await self.__date_filter(query=query, results=results)
 
-        return processed_results
+        logger.debug('-> Complete.')
+
+        return results
 
     async def create_containers(self, containers: Union[List[ContainerRequest], ContainerRequest]) -> Tuple[Results, Any]:
         # todo: handle revert_failure
@@ -306,57 +287,57 @@ class PhantomApiClient(BaseApiClient):
 
         return container_results, containers
 
-    async def get_user_count(self, query: Optional[Query] = None) -> Results:
-        if not query:
-            query = Query(type='ph_user', filter={'_filter_type__in': '["normal", "automation"]'}, page_size=1, page=0)
+    # async def get_user_count(self, query: Optional[Query] = None) -> Results:
+    #     if not query:
+    #         query = Query(type='ph_user', filter={'_filter_type__in': '["normal", "automation"]'}, page_size=1, page=0)
+    #
+    #     logger.debug('Getting user count...')
+    #
+    #     tasks = [asyncio.create_task(self.request(method='get',
+    #                                               end_point=query.type,
+    #                                               request_id=uuid4().hex,
+    #                                               params=query.dict()))]
+    #
+    #     results = Results(data=await asyncio.gather(*tasks))
+    #
+    #     logger.debug('-> Complete.')
+    #
+    #     return await self.process_results(results)
 
-        logger.debug('Getting user count...')
-
-        tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
-                                                  request_id=uuid4().hex,
-                                                  params=query.dict()))]
-
-        results = Results(data=await asyncio.gather(*tasks))
-
-        logger.debug('-> Complete.')
-
-        return await self.process_results(results)
-
-    async def get_users(self, user_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
-        if user_id:
-            t = f'/ph_user/{user_id}'
-        else:
-            t = '/ph_user'
-
-        if not query:
-            query = Query(type=t)
-        elif not query.type:
-            query.type = t
-
-        if not user_id:
-            page_limit = (await self.get_user_count(query=query)).success[0]['num_pages']
-        else:  # When we're getting a single user we can skip paging
-            page_limit = 1
-
-        logger.debug(f'Getting user(s)...')
-
-        tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.type,
-                                                  request_id=uuid4().hex,
-                                                  params={**query.dict(), 'page': i}))
-                 for i in range(0, page_limit)]
-
-        results = Results(data=await asyncio.gather(*tasks))
-
-        logger.debug('-> Complete.')
-
-        if user_id:
-            data_key = None
-        else:
-            data_key = 'data'
-
-        return await self.process_results(results, data_key)
+    # async def get_users(self, user_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
+    #     if user_id:
+    #         t = f'/ph_user/{user_id}'
+    #     else:
+    #         t = '/ph_user'
+    #
+    #     if not query:
+    #         query = Query(type=t)
+    #     elif not query.type:
+    #         query.type = t
+    #
+    #     if not user_id:
+    #         page_limit = (await self.get_user_count(query=query)).success[0]['num_pages']
+    #     else:  # When we're getting a single user we can skip paging
+    #         page_limit = 1
+    #
+    #     logger.debug(f'Getting user(s)...')
+    #
+    #     tasks = [asyncio.create_task(self.request(method='get',
+    #                                               end_point=query.type,
+    #                                               request_id=uuid4().hex,
+    #                                               params={**query.dict(), 'page': i}))
+    #              for i in range(0, page_limit)]
+    #
+    #     results = Results(data=await asyncio.gather(*tasks))
+    #
+    #     logger.debug('-> Complete.')
+    #
+    #     if user_id:
+    #         data_key = None
+    #     else:
+    #         data_key = 'data'
+    #
+    #     return await self.process_results(results, data_key)
 
     async def get_audit_data(self, query: Optional[AuditQuery] = None) -> Results:
         """
@@ -389,7 +370,7 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results)
 
-    async def delete_records(self, ids: Union[List[int], int], query: Query = None) -> Results:
+    async def delete_records(self, ids: Union[List[int], int], query: Union[ContainerQuery] = None) -> Results:
         """
 
         Args:
@@ -399,22 +380,30 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)
         """
-        logger.debug(f'Deleting {query.type}, record(s)...')
-        # todo: Might need to add delay between deletes
-        self.sem = asyncio.Semaphore(3)  # Deletes need to be done more slowly.
+        logger.debug(f'Deleting {type(query)}, record(s)...')
+        self.sem = asyncio.Semaphore()  # Deletes need to be done more slowly.
 
         if not type(ids) is list:
             ids = [ids]
 
+        if type(query) is ContainerQuery:
+            ep = '/container'
+        else:
+            logger.error(f'Unknown query type: {type(query)}')
+            raise NotImplementedError
+
         tasks = [asyncio.create_task(self.request(method='delete',
-                                                  end_point=f'{query.type}/{id}',
+                                                  end_point=f'{ep}/{id}',
                                                   request_id=uuid4().hex)) for id in ids]
 
         results = Results(data=await asyncio.gather(*tasks))
 
         logger.debug('-> Complete.')
 
-        self.sem = asyncio.Semaphore(self.SEM)
+        try:
+            self.sem = asyncio.Semaphore(self.cfg['Options']['SEM'])
+        except KeyError:
+            self.sem = asyncio.Semaphore(self.SEM)
 
         return await self.process_results(results)
 

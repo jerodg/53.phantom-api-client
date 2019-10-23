@@ -38,7 +38,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 ## Special Features (Not Offered by REST API)
 - [ ] Get containers; Filtered by Date-Range
 
-## API Implementation, Categories (2/24) ~8.3%, Functions (31/117) ~26.5%
+## API Implementation, Categories (2/24) ~8.3%, Functions (32/118) ~27.1%
 __*These should match unit tests.__
 - [ ] Actions:
     - [ ] Run Action
@@ -95,6 +95,7 @@ __*These should match unit tests.__
     - [x] Get All Containers
     - [x] Get All Containers Filtered
     - [x] Get One Container
+    - [x] Get Many Containers
     - [x] Create One Container
     - [x] Create Containers
     - [x] Update Container
