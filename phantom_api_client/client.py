@@ -67,32 +67,6 @@ class PhantomApiClient(BaseApiClient):
                            parse(r[query.date_filter_field], dayfirst=False) <= query.date_filter_end]
         return results
 
-    async def get_artifact_count(self, container_id: Optional[int] = None,
-                                 query: Optional[ArtifactQuery] = ArtifactQuery(page=0, page_size=1)) -> Results:
-        """
-        Performs a single page query to get the 'results_count' & 'num_paqges' based on specified Query.
-        Args:
-            container_id (Optional[int]):
-            query (Optional[Query]):
-
-        Returns:
-            results (Results)
-        """
-        logger.debug(f'Getting artifact count...')
-
-        if container_id:
-            ep = f'/container/{container_id}/artifacts'
-        else:
-            ep = '/artifact'
-
-        tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=ep,
-                                                  request_id=uuid4().hex,
-                                                  params=query.dict()))]
-
-        logger.debug('-> Complete.')
-
-        return await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
     async def get_artifacts(self, artifact_id: Optional[int] = None,
                             container_id: Optional[int] = None,
@@ -110,22 +84,15 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)
         """
-        if container_id:
-            ep = f'/container/{container_id}/artifacts'
-        elif artifact_id:
-            ep = f'/artifact/{artifact_id}'
-        else:
-            ep = '/artifact'
-
         if not artifact_id:
-            page_limit = (await self.get_artifact_count(container_id=container_id, query=query)).success[0]['num_pages']
+            page_limit = (await self.get_record_count(query)).success[0]['num_pages']
         else:  # When we're getting a single artifact we can skip paging
             page_limit = 1
 
         logger.debug(f'Getting artifact(s)...')
 
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=ep,
+                                                  end_point=query.end_point,
                                                   request_id=uuid4().hex,
                                                   params={**query.dict(), 'page': i}))
                  for i in range(0, page_limit)]
@@ -156,12 +123,12 @@ class PhantomApiClient(BaseApiClient):
 
         results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
-        [a.update_id(next((_['id'] for _ in results.success if _['request_id'] == a.data['request_id']), None))
+        [a.update_id(next((_['artifact_id'] for _ in results.success if _['request_id'] == a.data['request_id']), None))
          for x in containers for a in x.artifacts]
 
         for result in results.success:
-            result['artifact_id'] = result['id']
-            del result['id']
+            result['artifact_id'] = result['artifact_id']
+            del result['artifact_id']
 
         logger.debug('-> Complete.')
 
@@ -197,10 +164,7 @@ class PhantomApiClient(BaseApiClient):
         Returns:
             results (Results)"""
         if not query.container_id:
-            res = await self.get_record_count(query=query)
-            print('res:', res)
-            print('success:', res.success)
-            page_limit = (await self.get_record_count(query=query)).success[0]['num_pages']
+            page_limit = (await self.get_record_count(query)).success[0]['num_pages']
         else:  # When we're getting a single container we can skip paging
             page_limit = 1
 
@@ -235,12 +199,12 @@ class PhantomApiClient(BaseApiClient):
         container_results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
         logger.debug('-> Complete.')
 
-        [c.update_id(next((_['id'] for _ in container_results.success if _['request_id'] == c.data['request_id']), None))
+        [c.update_id(next((_['artifact_id'] for _ in container_results.success if _['request_id'] == c.data['request_id']), None))
          for c in containers]
 
         for result in container_results.success:
-            result['container_id'] = result['id']
-            del result['id']
+            result['container_id'] = result['artifact_id']
+            del result['artifact_id']
 
         artifact_results, containers = await self.create_artifacts(containers)
         container_results.success.extend(artifact_results.success)

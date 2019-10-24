@@ -21,10 +21,10 @@ import datetime as dt
 import time
 
 import pytest
-from base_api_client import bprint, Results, tprint
 from delorean import Delorean, parse
 from os import getenv
 
+from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery
 
@@ -42,7 +42,7 @@ def filter_by_date(results: Results) -> list:
     print(f'Found {len(containers)}, filtered containers.')
     print(*containers, sep='\n')
 
-    return [k['id'] for k in containers]
+    return [k['artifact_id'] for k in containers]
 
 
 @pytest.mark.asyncio
@@ -60,7 +60,7 @@ async def test_get_all_containers_filtered():
         results = await pac.get_containers(query=ContainerQuery(filter=f))
         # print(results)
 
-        ids = list(set([r['id'] for r in results.success]))
+        ids = list(set([r['artifact_id'] for r in results.success]))
         print('unique_ids:', len(ids))
 
         assert type(results) is Results

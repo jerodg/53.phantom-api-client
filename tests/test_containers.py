@@ -30,9 +30,9 @@ from tests.extras.generate_objects import generate_container
 
 
 @pytest.mark.asyncio
-async def test_get_containers_count():
+async def test_get__all_containers_count():
     ts = time.perf_counter()
-    bprint('Test: Get Containers Count')
+    bprint('Test: Get All Containers Count')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_record_count(query=ContainerQuery())
@@ -48,9 +48,9 @@ async def test_get_containers_count():
 
 
 @pytest.mark.asyncio
-async def test_get_containers_count_filtered():
+async def test_get_all_containers_count_filtered():
     ts = time.perf_counter()
-    bprint('Test: Get Containers Count Filtered')
+    bprint('Test: Get All Containers Count Filtered')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_record_count(query=ContainerQuery())
@@ -149,7 +149,7 @@ async def test_get_one_container():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
 
         results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids)))
 
@@ -169,7 +169,7 @@ async def test_get_one_container_whitelist_users():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
 
         results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), _annotation_whitelist_users=True))
         # print(results)
@@ -191,7 +191,7 @@ async def test_get_one_container_whitelist_candidates():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
 
         results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), whitelist_candidates=True))
         # print(results)
@@ -212,7 +212,7 @@ async def test_get_one_container_phases():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_container_type': '"case"'}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
 
         results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), phases=True))
         # print(results)
@@ -233,7 +233,7 @@ async def test_get_many_containers():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
 
         cids = [choice(ids), choice(ids)]
         while cids[0] == cids[1]:
@@ -312,7 +312,7 @@ async def test_update_one_container():
         container = generate_container()[0]
         container.clear()
         container.name = 'Update Test'
-        container.update_id(old_container['id'])
+        container.update_id(old_container['artifact_id'])
         results = await pac.update_records(container)
         # print(response_results)
 
@@ -324,7 +324,7 @@ async def test_update_one_container():
 
         tprint(results)
 
-        results = await pac.get_containers(query=ContainerQuery(container_id=old_container['id']))
+        results = await pac.get_containers(query=ContainerQuery(container_id=old_container['artifact_id']))
         print(f'Container After Update\n\t-> {results.success[0]}')
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
@@ -350,7 +350,7 @@ async def test_update_many_containers():
         [a.clear() for a in containers]
         for i, a in enumerate(containers):
             a.name = f'Update Test: {i}'
-            a.update_id(old_containers[i]['id'])
+            a.update_id(old_containers[i]['artifact_id'])
 
         results = await pac.update_records(containers)
 
@@ -362,7 +362,7 @@ async def test_update_many_containers():
 
         tprint(results)
 
-        results = await pac.get_containers(query=ContainerQuery(container_id=[c['id'] for c in old_containers]))
+        results = await pac.get_containers(query=ContainerQuery(container_id=[c['artifact_id'] for c in old_containers]))
         ucp = '\n\t-> '.join([str(d) for d in results.success])
         print(f'Containers After Update\n\t-> {ucp}')
 
@@ -376,7 +376,7 @@ async def test_delete_one_container():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
         assert ids  # Need containers to test
         cid = choice(ids)
 
@@ -408,7 +408,7 @@ async def test_delete_many_containers():
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(filter={'_filter_tenant': 2}))
-        ids = [c['id'] for c in results.success]
+        ids = [c['artifact_id'] for c in results.success]
         assert ids  # Need containers to test
 
         cids = [choice(ids), choice(ids)]

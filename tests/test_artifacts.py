@@ -17,263 +17,294 @@ copies or substantial portions of the Software.
 
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
+import time
 
-# from phantom_api_client.models import ContainerQuery, Query
+import pytest
+from os import getenv
+from random import choice
 
-#
-# @pytest.mark.asyncio
-# async def test_get_all_artifacts_count():
-#     ts = time.perf_counter()
-#     bprint('Test: Get All Artifacts Count')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_artifact_count()
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) >= 1
-#         assert not results.failure
-#
-#         tprint(results)  # Should return all artifacts across all containers
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_get_container_artifacts_count():
-#     ts = time.perf_counter()
-#     bprint('Test: Get Container Artifacts Count')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
-#         ids = [c['id'] for c in results.success]
-#
-#         results = await pac.get_artifact_count(container_id=choice(ids))
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) >= 1
-#         assert not results.failure
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_get_all_artifacts():
-#     ts = time.perf_counter()
-#     bprint('Test: Get All Artifacts')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_artifact_count()
-#         try:
-#             count = results.success[0]['count']
-#         except IndexError:
-#             count = 0
-#
-#         results = await pac.get_artifacts()
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == count
-#         assert not results.failure
-#
-#         tprint(results, top=5)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_get_one_artifact():
-#     ts = time.perf_counter()
-#     bprint('Test: Get One Artifact')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
-#         ids = [c['id'] for c in results.success]
-#
-#         results = await pac.get_artifacts(container_id=choice(ids))
-#         ids = [a['id'] for a in results.success]
-#
-#         results = await pac.get_artifacts(artifact_id=choice(ids))
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 1
-#         assert not results.failure
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_get_all_container_artifacts():
-#     ts = time.perf_counter()
-#     bprint('Test: Get All Container Artifacts')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_artifact_count(container_id=119109)
-#         count = results.success[0]['count']
-#         results = await pac.get_artifacts(container_id=119109)
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == count
-#         assert not results.failure
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# # todo: test below
-#
-# @pytest.mark.asyncio
-# async def test_delete_one_artifact():
-#     ts = time.perf_counter()
-#     bprint('Test: Delete One Artifact')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
-#         ids = [c['id'] for c in results.success]
-#         cid = choice(ids)
-#
-#         results = await pac.get_artifacts(container_id=cid)
-#         ids = [a['id'] for a in results.success]
-#
-#         results = await pac.get_artifacts(artifact_id=choice(ids))
-#
-#         results = await pac.delete_records(record_ids=[6113092], query=Query())
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 1
-#         assert not results.failure
-#         assert results.success
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_delete_artifacts():
-#     ts = time.perf_counter()
-#     bprint('Test: Delete Artifacts')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         # todo: Get or create random test container
-#         results = await pac.delete_records(record_ids=[6113090, 6113089], query=Query(type='artifact'))
-#         # print(results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 2
-#         assert not results.failure
-#         assert results.success[0]['success']
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_create_one_artifact():
-#     ts = time.perf_counter()
-#     bprint('Test: Create One Artifact')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         container = generate_container(artifact_count=1)
-#         container[0].update_id(119109)
-#         response_results, request_results = await pac.create_artifacts(container)
-#         # print(response_results)
-#
-#         assert type(response_results) is Results
-#         assert len(request_results) == 1
-#         assert len(response_results.success) == 1
-#         assert not response_results.failure
-#         assert response_results.success[0]['success']
-#
-#         tprint(response_results, request_results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_create_artifacts():
-#     ts = time.perf_counter()
-#     bprint('Test: Create Artifacts')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         container = generate_container(artifact_count=2)
-#         container[0].update_id(119109)
-#         response_results, request_results = await pac.create_artifacts(container)
-#         # print(response_results)
-#
-#         assert type(response_results) is Results
-#         assert len(request_results) == 1
-#         assert len(response_results.success) == 2
-#         assert not response_results.failure
-#         assert response_results.success[0]['success']
-#
-#         tprint(response_results, request_results, top=5)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_update_one_artifact():
-#     ts = time.perf_counter()
-#     bprint('Test: Update One Artifact')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         container = generate_container(artifact_count=1)[0]
-#         artifact = container.artifacts[0]
-#         rid = artifact.data['request_id']
-#         artifact.clear()
-#         artifact.data = {'request_id': rid}
-#         artifact.name = 'Update Test'
-#         artifact.update_id(6119877)
-#         results = await pac.update_records(artifact)
-#         # print(response_results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 1
-#         assert not results.failure
-#         assert results.success
-#         assert results.success[0]['success']
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-#
-#
-# @pytest.mark.asyncio
-# async def test_update_artifacts():
-#     ts = time.perf_counter()
-#     bprint('Test: Update Artifacts')
-#
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-#         container = generate_container(artifact_count=2)[0]
-#         artifacts = container.artifacts
-#         rids = [a.data['request_id'] for a in artifacts]
-#         [a.clear() for a in artifacts]
-#         ids = [6119877, 6119876]
-#         for i, a in enumerate(artifacts):
-#             a.data = {'request_id': rids[i]}
-#             a.name = f'Update Test: {i}'
-#             a.update_id(ids[i])
-#
-#         results = await pac.update_records(artifacts)
-#         # print(response_results)
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 2
-#         assert not results.failure
-#         assert results.success
-#         assert results.success[0]['success']
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+from base_api_client import bprint, Results, tprint
+from phantom_api_client import PhantomApiClient
+from phantom_api_client.models import ArtifactQuery, ContainerQuery, Query
+from tests.extras.generate_objects import generate_container
+
+
+@pytest.mark.asyncio
+async def test_get_all_artifacts_count():
+    ts = time.perf_counter()
+    bprint('Test: Get All Artifacts Count')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_record_count(ArtifactQuery())
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)  # Should return all artifacts across all containers
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_artifacts_count_filtered():
+    ts = time.perf_counter()
+    bprint('Test: Get All Artifacts Count Filtered')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_record_count(ArtifactQuery())
+        unfiltered = results.success[0]['count']
+
+        results = await pac.get_record_count(ArtifactQuery(filter={'_filter_type': '"test"'}))
+        filtered = results.success[0]['count']
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+        assert unfiltered > filtered
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_container_artifacts_count():
+    ts = time.perf_counter()
+    bprint('Test: Get Container Artifacts Count')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['artifact_id'] for c in results.success]
+
+        results = await pac.get_artifact_count(container_id=choice(ids))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Get All Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_artifact_count()
+        try:
+            count = results.success[0]['count']
+        except IndexError:
+            count = 0
+
+        results = await pac.get_artifacts()
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == count
+        assert not results.failure
+
+        tprint(results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_one_artifact():
+    ts = time.perf_counter()
+    bprint('Test: Get One Artifact')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['artifact_id'] for c in results.success]
+
+        results = await pac.get_artifacts(container_id=choice(ids))
+        ids = [a['artifact_id'] for a in results.success]
+
+        results = await pac.get_artifacts(artifact_id=choice(ids))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_all_container_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Get All Container Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_artifact_count(container_id=119109)
+        count = results.success[0]['count']
+        results = await pac.get_artifacts(container_id=119109)
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == count
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+# todo: test below
+
+@pytest.mark.asyncio
+async def test_delete_one_artifact():
+    ts = time.perf_counter()
+    bprint('Test: Delete One Artifact')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        ids = [c['artifact_id'] for c in results.success]
+        cid = choice(ids)
+
+        results = await pac.get_artifacts(container_id=cid)
+        ids = [a['artifact_id'] for a in results.success]
+
+        results = await pac.get_artifacts(artifact_id=choice(ids))
+
+        results = await pac.delete_records(record_ids=[6113092], query=Query())
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+        assert results.success
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_delete_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Delete Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        # todo: Get or create random test container
+        results = await pac.delete_records(record_ids=[6113090, 6113089], query=Query(type='artifact'))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) == 2
+        assert not results.failure
+        assert results.success[0]['success']
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_one_artifact():
+    ts = time.perf_counter()
+    bprint('Test: Create One Artifact')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        container = generate_container(artifact_count=1)
+        container[0].update_id(119109)
+        response_results, request_results = await pac.create_artifacts(container)
+        # print(response_results)
+
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 1
+        assert not response_results.failure
+        assert response_results.success[0]['success']
+
+        tprint(response_results, request_results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Create Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        container = generate_container(artifact_count=2)
+        container[0].update_id(119109)
+        response_results, request_results = await pac.create_artifacts(container)
+        # print(response_results)
+
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 2
+        assert not response_results.failure
+        assert response_results.success[0]['success']
+
+        tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_update_one_artifact():
+    ts = time.perf_counter()
+    bprint('Test: Update One Artifact')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        container = generate_container(artifact_count=1)[0]
+        artifact = container.artifacts[0]
+        rid = artifact.data['request_id']
+        artifact.clear()
+        artifact.data = {'request_id': rid}
+        artifact.name = 'Update Test'
+        artifact.update_id(6119877)
+        results = await pac.update_records(artifact)
+        # print(response_results)
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+        assert results.success
+        assert results.success[0]['success']
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_update_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Update Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        container = generate_container(artifact_count=2)[0]
+        artifacts = container.artifacts
+        rids = [a.data['request_id'] for a in artifacts]
+        [a.clear() for a in artifacts]
+        ids = [6119877, 6119876]
+        for i, a in enumerate(artifacts):
+            a.data = {'request_id': rids[i]}
+            a.name = f'Update Test: {i}'
+            a.update_id(ids[i])
+
+        results = await pac.update_records(artifacts)
+        # print(response_results)
+
+        assert type(results) is Results
+        assert len(results.success) == 2
+        assert not results.failure
+        assert results.success
+        assert results.success[0]['success']
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

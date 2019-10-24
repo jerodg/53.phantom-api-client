@@ -43,7 +43,7 @@ def filter_by_date(results: Results) -> list:
     print(f'Found {len(containers)}, filtered containers.')
     print(*containers, sep='\n')
 
-    return [k['id'] for k in containers]
+    return [k['artifact_id'] for k in containers]
 
 
 @pytest.mark.asyncio

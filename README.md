@@ -34,7 +34,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 ```python
 
 ```
-## API Implementation, Categories (1/24) ~4.1%, Functions (16/119) ~13.4%
+## API Implementation, Categories (1/24) ~4.1%, Functions (18/123) ~13.4%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -44,18 +44,23 @@ This modules' primary use-case is inheritance from other REST API clients.
     - [ ] Delete Rule
 - [ ] Apps:
     - [ ] Install App    
-- [ ] Artifacts:
-    - [ ] Get All Artifacts Count
-    - [ ] Get Container Artifacts Count
-    - [ ] Get All Artifacts
-    - [ ] Get One Artifact
-    - [ ] Get All Container Artifacts    
+- [ ] Artifacts: (2/16) ~0.0%
+    - [x] Get All Artifacts Count
+    - [x] Get All Artifacts Count Filtered
+    - [ ] Get One Container Artifacts Count    
+    - [ ] Get All Artifacts    
+    - [ ] Get All Artifacts Filtered
+    - [ ] Get All Artifacts Date-Filtered
+    - [ ] Get All Container Artifacts
+    - [ ] Get All Container Artifacts Date-Filtered
+    - [ ] Get One Artifact    
     - [ ] Create One Artifact
-    - [ ] Create Artifacts
+    - [ ] Create Many Artifacts
     - [ ] Update Artifact
-    - [ ] Update Artifacts
+    - [ ] Update Many Artifacts
     - [ ] Delete One Artifact
-    - [ ] Delete Artifacts
+    - [ ] Delete Many Artifacts
+    - [ ] Delete All Container Artifacts    
 - [ ] Assets:
     - [ ] Create Assets
 - [ ] Attachments:
@@ -85,8 +90,8 @@ This modules' primary use-case is inheritance from other REST API clients.
 - [ ] Clustering:
     - [ ] Get Nodes
 - [x] Containers: (16/16) 100%
-    - [x] Get Containers Count
-    - [x] Get Containers Count Filtered
+    - [x] Get All Containers Count
+    - [x] Get All Containers Count Filtered
     - [x] Get All Containers
     - [x] Get All Containers Filtered
     - [x] Get All Containers Date Filtered (Custom Date Filtering)

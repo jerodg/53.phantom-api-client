@@ -65,7 +65,7 @@ def main() -> NoReturn:
           setup_requires=[] + ['pytest-runner'] if {'pytest', 'test', 'ptr'}.intersection(sys.argv) else [],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.32.16',
+          version='0!0.32.18',
           zip_safe=True)
 
 
