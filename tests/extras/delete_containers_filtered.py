@@ -22,10 +22,10 @@ import time
 from typing import NoReturn
 
 import pytest
-from base_api_client import bprint, Results, tprint
 from delorean import Delorean, parse
 from os import getenv
 
+from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery
 
@@ -67,7 +67,7 @@ async def test_delete_containers() -> NoReturn:
         print('Deleting containers...')
         filtered_ids = filter_by_date(results)
 
-        # results1 = await pac.delete_records(ids=filtered_ids, query=Query(type='container'))
+        # results1 = await pac.delete_records(record_ids=filtered_ids, query=Query(type='container'))
         #
         # assert type(results1) is Results
         # assert not results1.failure
@@ -76,11 +76,11 @@ async def test_delete_containers() -> NoReturn:
 
         # # Verify test containers have been deleted
         # results2 = await pac.get_containers(Query(type='container', filter=f))
-        # ids = filter_by_date(results2.success)
+        # record_ids = filter_by_date(results2.success)
         # # print('results2', results2)
         #
         # assert type(results2) is Results
-        # assert len(ids) == 0
+        # assert len(record_ids) == 0
         # assert not results2.failure
         #
         # tprint(results2, top=5)

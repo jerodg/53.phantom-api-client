@@ -178,20 +178,11 @@ class PhantomApiClient(BaseApiClient):
         """
         logger.debug(f'Getting {type(query)} record count...')
 
-        if type(query) == ArtifactQuery:
-            ep = '/artifact'
-        elif type(query) == AuditQuery:
-            ep = '/audit'
-        elif type(query) == ContainerQuery:
-            ep = '/container'
-        else:
-            raise InvalidOptionError('get_record_count()', ['ArtifactQuery', 'AuditQuery', 'ContainerQuery'])
-
         query.page = 0
         query.page_size = 1
 
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=ep,
+                                                  end_point=query.endpoint,
                                                   request_id=uuid4().hex,
                                                   params=query.dict()))]
 
@@ -205,51 +196,21 @@ class PhantomApiClient(BaseApiClient):
 
         Returns:
             results (Results)"""
-        try:
-            if query.whitelist_candidates:
-                wlp = '/permitted_users'
-            elif query.phases:
-                wlp = '/phases'
-            else:
-                wlp = ''
-        except AttributeError:
-            wlp = ''
-
-        if query.container_id:
-            if type(query.container_id) is list:
-                if wlp:
-                    raise InvalidCombinationError
-                query._filter_id__in = str(query.container_id)
-                ep = '/container'
-            else:
-                ep = f'/container/{query.container_id}{wlp}'
-        else:
-            ep = '/container'
-
         if not query.container_id:
+            res = await self.get_record_count(query=query)
+            print('res:', res)
+            print('success:', res.success)
             page_limit = (await self.get_record_count(query=query)).success[0]['num_pages']
         else:  # When we're getting a single container we can skip paging
             page_limit = 1
 
-        logger.debug(f'Getting container(s) {"phases" if wlp == "/phases" else ""}...')
-
         tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=ep,
+                                                  end_point=query.endpoint,
                                                   request_id=uuid4().hex,
                                                   params={**query.dict(), 'page': i}))
                  for i in range(0, page_limit)]
 
-        if query.container_id and not type(query.container_id) is list:
-            data_key = None
-        else:
-            data_key = 'data'
-
-        if wlp == '/permitted_users':
-            data_key = 'users'
-        elif wlp == '/phases':
-            data_key = 'data'
-
-        results = await self.process_results(Results(data=await asyncio.gather(*tasks)), data_key)
+        results = await self.process_results(Results(data=await asyncio.gather(*tasks)), query.data_key)
 
         if query.date_filter_field:
             results = await self.__date_filter(query=query, results=results)
@@ -370,21 +331,21 @@ class PhantomApiClient(BaseApiClient):
 
         return await self.process_results(results)
 
-    async def delete_records(self, ids: Union[List[int], int], query: Union[ContainerQuery] = None) -> Results:
+    async def delete_records(self, record_ids: Union[List[int], int], query: Union[ContainerQuery]) -> Results:
         """
 
         Args:
-            ids (Union[List[int], int]):
+            record_ids (Union[List[int], int]):
             query (Query): query.type is required
 
         Returns:
             results (Results)
         """
         logger.debug(f'Deleting {type(query)}, record(s)...')
-        self.sem = asyncio.Semaphore()  # Deletes need to be done more slowly.
+        self.sem = asyncio.Semaphore()  # Deletes need to be done more slowly. # todo: perhaps not; need more testing
 
-        if not type(ids) is list:
-            ids = [ids]
+        if not type(record_ids) is list:
+            record_ids = [record_ids]
 
         if type(query) is ContainerQuery:
             ep = '/container'
@@ -393,8 +354,8 @@ class PhantomApiClient(BaseApiClient):
             raise NotImplementedError
 
         tasks = [asyncio.create_task(self.request(method='delete',
-                                                  end_point=f'{ep}/{id}',
-                                                  request_id=uuid4().hex)) for id in ids]
+                                                  end_point=f'{ep}/{rid}',
+                                                  request_id=uuid4().hex)) for rid in record_ids]
 
         results = Results(data=await asyncio.gather(*tasks))
 

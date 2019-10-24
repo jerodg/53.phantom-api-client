@@ -6,10 +6,10 @@
 ```
 
 ![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
-![python](https://img.shields.io/badge/Python-3.7/8%2B-blue.svg)
+![python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
 ![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-![0%](https://img.shields.io/badge/Coverage-%25-red.svg)
+![0%](https://img.shields.io/badge/Coverage-75%25-red.svg)
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
 
 # Splunk-Phantom, API client.
@@ -34,12 +34,7 @@ This modules' primary use-case is inheritance from other REST API clients.
 ```python
 
 ```
-
-## Special Features (Not Offered by REST API)
-- [ ] Get containers; Filtered by Date-Range
-
-## API Implementation, Categories (2/24) ~8.3%, Functions (32/118) ~27.1%
-__*These should match unit tests.__
+## API Implementation, Categories (1/24) ~4.1%, Functions (16/119) ~13.4%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -49,18 +44,18 @@ __*These should match unit tests.__
     - [ ] Delete Rule
 - [ ] Apps:
     - [ ] Install App    
-- [x] Artifacts:
-    - [x] Get All Artifacts Count
-    - [x] Get Container Artifacts Count
-    - [x] Get All Artifacts
-    - [x] Get One Artifact
-    - [x] Get All Container Artifacts    
-    - [x] Create One Artifact
-    - [x] Create Artifacts
-    - [x] Update Artifact
-    - [x] Update Artifacts
-    - [x] Delete One Artifact
-    - [x] Delete Artifacts
+- [ ] Artifacts:
+    - [ ] Get All Artifacts Count
+    - [ ] Get Container Artifacts Count
+    - [ ] Get All Artifacts
+    - [ ] Get One Artifact
+    - [ ] Get All Container Artifacts    
+    - [ ] Create One Artifact
+    - [ ] Create Artifacts
+    - [ ] Update Artifact
+    - [ ] Update Artifacts
+    - [ ] Delete One Artifact
+    - [ ] Delete Artifacts
 - [ ] Assets:
     - [ ] Create Assets
 - [ ] Attachments:
@@ -77,8 +72,8 @@ __*These should match unit tests.__
     - [ ] Get Administration Audit Data
     - [ ] Get One Playbook Audit Data
     - [ ] Get 'N' Playbooks Audit Data
-    - [x] Get One Container Audit Data
-    - [x] Get 'N' Containers Audit Data
+    - [ ] Get One Container Audit Data
+    - [ ] Get 'N' Containers Audit Data
     - [ ] Get All Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
@@ -89,22 +84,23 @@ __*These should match unit tests.__
     - [ ] Delete Custom CEF
 - [ ] Clustering:
     - [ ] Get Nodes
-- [x] Containers:
+- [x] Containers: (16/16) 100%
     - [x] Get Containers Count
     - [x] Get Containers Count Filtered
     - [x] Get All Containers
     - [x] Get All Containers Filtered
+    - [x] Get All Containers Date Filtered (Custom Date Filtering)
     - [x] Get One Container
+    - [x] Get One Container Whitelist Users
+    - [x] Get One Container Whitelist Candidates
+    - [x] Get One Container Phases    
     - [x] Get Many Containers
     - [x] Create One Container
-    - [x] Create Containers
-    - [x] Update Container
-    - [x] Update Containers
-    - [x] Delete Container
-    - [x] Delete Containers
-    - [x] Get Container Phases
-    - [x] Get Container Whitelisted Users
-    - [x] Get Whitelist Candidates (users who can view a container)
+    - [x] Create Many Containers
+    - [x] Update One Container
+    - [x] Update Many Containers
+    - [x] Delete One Container
+    - [x] Delete Many Containers
 - [ ] Custom Lists:
     - [ ] Get List
     - [ ] Create List
@@ -168,12 +164,12 @@ __*These should match unit tests.__
     - [ ] Create Tenant
     - [ ] Update Tenant
 - [ ] Users:
-    - [x] Get Users Count
-    - [x] Get One User
-    - [x] Get All Users
+    - [ ] Get Users Count
+    - [ ] Get One User
+    - [ ] Get All Users
     - [ ] Create One User
     - [ ] Update One User
-    - [x] Delete One User
+    - [ ] Delete One User
     - [ ] Create Role/Permissions
 - [ ] Workbooks (formerly known as Case Templates):
     - [ ] Create Case Workflow Template
@@ -182,6 +178,30 @@ __*These should match unit tests.__
     - [ ] Add Phase Template to Workflow Template
     - [ ] Add Task to Phase Template 
     - [ ] Get Workbook Phases
+    
+## Test Coverage
+
+platform linux, python 3.8.0-beta-3
+-
+
+|   Name                                        |   Stmts   |   Miss    |  Cover   |
+|   ------------------------------------------  |--------   |-------    |-------:   |
+|   phantom_api_client/__init__.py              |       2   |      0    |   100%   |
+|   phantom_api_client/client.py                |     134   |     42    |    69%   |
+|   phantom_api_client/models/__init__.py       |      12   |      0    |   100%   |
+|   phantom_api_client/models/artifact.py       |      44   |     14    |    68%   |
+|   phantom_api_client/models/attachment.py     |      34   |     15    |    56%   |
+|   phantom_api_client/models/audit.py          |      27   |     27    |     0%   |
+|   phantom_api_client/models/cef.py            |     156   |      4    |    97%   |
+|   phantom_api_client/models/comment.py        |       9   |      1    |    89%   |
+|   phantom_api_client/models/container.py      |      54   |      4    |    93%   |
+|   phantom_api_client/models/custom_fields.py  |      32   |      8    |    75%   |
+|   phantom_api_client/models/exceptions.py     |      22   |     12    |    45%   |
+|   phantom_api_client/models/note.py           |      12   |      1    |    92%   |
+|   phantom_api_client/models/phantomquery.py   |     165   |     45    |    73%   |
+|   phantom_api_client/models/pin.py            |      25   |     11    |    56%   |
+|   ____________________________________________    | ____  |   _____   |   ____    |
+|   TOTAL                                       |     728   |    184    |    75%   |
 
 ## Performance Notes
 Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM

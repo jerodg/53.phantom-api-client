@@ -148,13 +148,77 @@ async def test_get_one_container():
     bprint('Test: Get One Container')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=20))
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
 
         results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids)))
 
         assert type(results) is Results
         assert len(results.success) == 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_one_container_whitelist_users():
+    ts = time.perf_counter()
+    bprint('Test: Get One Container')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
+        ids = [c['id'] for c in results.success]
+
+        results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), _annotation_whitelist_users=True))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+        assert type(results.success[0]['whitelist_users']) is list
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_one_container_whitelist_candidates():
+    ts = time.perf_counter()
+    bprint('Test: Get One Container Whitelist Candidates')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
+        ids = [c['id'] for c in results.success]
+
+        results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), whitelist_candidates=True))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_get_one_container_phases():
+    ts = time.perf_counter()
+    bprint('Test: Get One Container Phases')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+        results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_container_type': '"case"'}))
+        ids = [c['id'] for c in results.success]
+
+        results = await pac.get_containers(query=ContainerQuery(container_id=choice(ids), phases=True))
+        # print(results)
+
+        assert type(results) is Results
+        assert len(results.success) >= 1
         assert not results.failure
 
         tprint(results)
@@ -172,7 +236,7 @@ async def test_get_many_containers():
         ids = [c['id'] for c in results.success]
 
         cids = [choice(ids), choice(ids)]
-        while ids[0] == ids[1]:
+        while cids[0] == cids[1]:
             cids[1] = choice(results.success)
 
         results = await pac.get_containers(query=ContainerQuery(container_id=cids))
@@ -203,13 +267,17 @@ async def test_create_one_container():
 
         tprint(response_results, request_results)
 
+        print('\nVerify Results from Phantom')
+        results = await pac.get_containers(query=ContainerQuery(filter={'_filter_id': response_results.success[0]['container_id']}))
+        tprint(results)
+
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
 @pytest.mark.asyncio
-async def test_create_containers():
+async def test_create_many_containers():
     ts = time.perf_counter()
-    bprint('Test: Create Containers')
+    bprint('Test: Create Many Containers')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         response_results, request_results = await pac.create_containers(generate_container(container_count=2))
@@ -222,6 +290,11 @@ async def test_create_containers():
         assert response_results.success[0]['success']
 
         tprint(response_results, request_results)
+
+        print('\nVerify Results from Phantom')
+        ids = [r['container_id'] for r in response_results.success]
+        results = await pac.get_containers(query=ContainerQuery(filter={'_filter_id__in': str(ids)}))
+        tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
@@ -237,9 +310,7 @@ async def test_update_one_container():
         print(f'Container Prior Update\n\t-> {old_container}')
 
         container = generate_container()[0]
-        # rid = container.data['request_id']
         container.clear()
-        # container.data = {'request_id': rid}
         container.name = 'Update Test'
         container.update_id(old_container['id'])
         results = await pac.update_records(container)
@@ -260,9 +331,9 @@ async def test_update_one_container():
 
 
 @pytest.mark.asyncio
-async def test_update_containers():
+async def test_update_many_containers():
     ts = time.perf_counter()
-    bprint('Test: Update Containers')
+    bprint('Test: Update Many Containers')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
@@ -307,8 +378,9 @@ async def test_delete_one_container():
         results = await pac.get_containers(query=ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
         assert ids  # Need containers to test
+        cid = choice(ids)
 
-        results = await pac.delete_records(ids=choice(ids), query=ContainerQuery())
+        results = await pac.delete_records(record_ids=cid, query=ContainerQuery())
         # print(results)
 
         assert type(results) is Results
@@ -318,20 +390,32 @@ async def test_delete_one_container():
 
         tprint(results)
 
+        print('\nVerify Results from Phantom')
+        results = await pac.get_containers(query=ContainerQuery(filter={'_filter_id': cid}))
+
+        assert not results.success
+        assert not results.failure
+
+        tprint(results)
+
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
 @pytest.mark.asyncio
-async def test_delete_containers():
+async def test_delete_many_containers():
     ts = time.perf_counter()
-    bprint('Test: Delete Containers')
+    bprint('Test: Delete Many Containers')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_containers(query=ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
         assert ids  # Need containers to test
 
-        results = await pac.delete_records(ids=[choice(ids), choice(ids)], query=ContainerQuery())
+        cids = [choice(ids), choice(ids)]
+        while cids[0] == cids[1]:
+            cids[1] = choice(results.success)
+
+        results = await pac.delete_records(record_ids=cids, query=ContainerQuery())
         # print(results)
 
         assert type(results) is Results
@@ -341,57 +425,9 @@ async def test_delete_containers():
 
         tprint(results)
 
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+        results = await pac.get_containers(query=ContainerQuery(filter={'_filter_id__in': str(cids)}))
 
-
-@pytest.mark.asyncio
-async def test_get_one_container_whitelist_users():
-    ts = time.perf_counter()
-    bprint('Test: Get One Container')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_containers(container_id=119109, query=ContainerQuery(_annotation_whitelist_users=True))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-        assert type(results.success[0]['whitelist_users']) is list
-
-        tprint(results)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
-async def test_get_one_container_whitelist_candidates():
-    ts = time.perf_counter()
-    bprint('Test: Get One Container Whitelist Candidates')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_containers(container_id=119109, query=ContainerQuery(whitelist_candidates=True))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
-async def test_get_one_container_phases():
-    ts = time.perf_counter()
-    bprint('Test: Get One Container Phases')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_containers(container_id=151986, query=ContainerQuery(phases=True))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
+        assert not results.success
         assert not results.failure
 
         tprint(results)

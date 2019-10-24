@@ -20,6 +20,7 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
+from uuid import uuid4
 
 from copy import deepcopy
 
@@ -65,7 +66,7 @@ class ContainerRequest(Record):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
-        # self.data = {'request_id': uuid4().hex}
+        self.data = {'request_id': uuid4().hex}
 
     def update_id(self, id: int):
         self.id = id
