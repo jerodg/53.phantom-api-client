@@ -19,6 +19,7 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 import datetime as dt
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
@@ -26,6 +27,9 @@ from copy import deepcopy
 from delorean import Delorean, parse
 
 from base_api_client.models import Record, sort_dict
+from phantom_api_client.models import InvalidCombinationError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -197,6 +201,11 @@ class ContainerQuery(PhantomQuery):
         except KeyError:
             pass
 
+        if self.phases:
+            for k, v in dct.items():
+                if '_filter' in k:
+                    del dct[k]
+
         if cleanup:
             dct = {k: v for k, v in dct.items() if v is not None}
 
@@ -204,6 +213,57 @@ class ContainerQuery(PhantomQuery):
             dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
         return dct
+
+    @property
+    def endpoint(self):
+        try:
+            if self.whitelist_candidates:
+                wlp = '/permitted_users'
+            elif self.phases:
+                wlp = '/phases'
+            else:
+                wlp = ''
+        except AttributeError:
+            wlp = ''
+
+        if self.container_id:
+            if type(self.container_id) is list:
+                if wlp:
+                    raise InvalidCombinationError
+                self._filter_id__in = str(self.container_id)
+                ep = '/container'
+            else:
+                ep = f'/container/{self.container_id}{wlp}'
+        else:
+            ep = '/container'
+
+        logger.debug(f'Getting container(s) {"phases" if wlp == "/phases" else ""}...')
+
+        return ep
+
+    @property
+    def data_key(self):
+        try:
+            if self.whitelist_candidates:
+                wlp = '/permitted_users'
+            elif self.phases:
+                wlp = '/phases'
+            else:
+                wlp = ''
+        except AttributeError:
+            wlp = ''
+
+        if self.container_id and not type(self.container_id) is list:
+            data_key = None
+        else:
+            data_key = 'data'
+
+        if wlp == '/permitted_users':
+            data_key = 'users'
+        elif wlp == '/phases':
+            data_key = 'data'
+
+        return data_key
 
 
 if __name__ == '__main__':
