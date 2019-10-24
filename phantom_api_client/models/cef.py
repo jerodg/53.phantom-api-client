@@ -18,10 +18,13 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
+import logging
 from dataclasses import dataclass
 from typing import Union
 
 from base_api_client import Record
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -170,11 +173,14 @@ class Cef(Record):
     suid: Union[str, None] = None
     suser: Union[str, None] = None
     transportProtocol: Union[str, None] = None
-    customCef: dict = None
+    customCef: dict = None  # Must be single-level dict
 
     def __post_init__(self):
         if self.customCef:
-            for k, v in self.customCef.items():
-                self.__dict__[k] = v
+            self.load(**self.customCef)
 
             del self.customCef
+
+
+if __name__ == '__main__':
+    print(__doc__)

@@ -18,12 +18,17 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
-from dataclasses import dataclass
-from typing import Dict, List, Union
+import logging
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Union
 from uuid import uuid4
 
-from base_api_client.models.record import Record
+from copy import deepcopy
+
+from base_api_client.models.record import Record, sort_dict
 from phantom_api_client.models.cef import Cef
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -31,7 +36,7 @@ class ArtifactRequest(Record):
     cef: Union[Cef, dict, None] = None  # Common Event Format
     cef_types: Union[Dict[str, List[str]], None] = None
     container_id: Union[int, None] = None
-    data: Union[dict, None] = None
+    data: Union[dict, None] = field(default_factory=dict)
     description: Union[str, None] = None
     end_time: Union[str, None] = None  # ISO-8601 Timestamp
     ingest_app_id: Union[int, str, None] = None
@@ -49,36 +54,35 @@ class ArtifactRequest(Record):
     id: int = None
 
     def __post_init__(self):
-        if self.data:
-            self.data = dict(sorted({k: v for k, v in self.data.items() if v is not None}.items()))
 
         if type(self.cef) is Cef:
             self.cef = self.cef.dict()
 
-        self.data = {'request_id': uuid4().hex}
+        self.data = {**self.data, 'request_id': uuid4().hex}
 
-    def update_id(self, id: int):
-        self.id = id
+    def update_id(self, artifact_id: int):
+        self.id = artifact_id
 
-    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
         Args:
-            d (Optional[dict]):
-            sort_order (Optional[str]): ASC | DESC
             cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
 
         Returns:
-            d (dict):"""
-        d = {**self.__dict__}
-        del d['id']
+            dct (dict):"""
+        dct = deepcopy(self.__dict__)
+
+        del dct['id']
 
         if cleanup:
-            d = {k: v for k, v in d.items() if v is not None}
+            dct = {k: v for k, v in dct.items() if v is not None}
 
         if sort_order:
-            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
-        return d
+        return dct
 
 
 if __name__ == '__main__':

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class PhantomQuery(Record):
+class Query(Record):
     """
     Attributes:
         type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node|ph_user
@@ -72,8 +72,27 @@ class PhantomQuery(Record):
 
 
 @dataclass
-class ArtifactQuery(PhantomQuery):
-    artifact_id: Optional[int] = None
+class ArtifactQuery(Query):
+    """
+    Valid Filter Fields
+        case_artifact_map, cases, cef, cef_types, child_artifacts, container,
+        container_id, create_time, data, description, end_time, evidence,
+        has_note, hash, id, in_case, indicatorartifactrecord, indicators,
+        ingest_app, ingest_app_id, kill_chain, label, name, note, owner,
+        owner_id, parent_artifact, parent_artifact_id, parent_container,
+        parent_container_id, playbook_run, playbook_run_id, severity,
+        severity_id, source_artifact_map, source_data_identifier, start_time,
+        tags, type, update_time, version
+
+    Args:
+        artifact_id (Optional[Union[int, List[int]]]):
+        container_id  (Optional[Union[int, List[int]]]):
+    """
+    artifact_id: Optional[Union[int, List[int]]] = None
+    container_id: Optional[Union[int, List[int]]] = None
+
+    def __post_init__(self):
+        super().__post_init__()
 
     def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
@@ -92,6 +111,11 @@ class ArtifactQuery(PhantomQuery):
         except KeyError:
             pass
 
+        try:
+            del dct['container_id']
+        except KeyError:
+            pass
+
         if cleanup:
             dct = {k: v for k, v in dct.items() if v is not None}
 
@@ -100,9 +124,29 @@ class ArtifactQuery(PhantomQuery):
 
         return dct
 
+    @property
+    def endpoint(self):
+        if self.container_id:
+            ep = f'/container/{self.container_id}/artifacts'
+        elif self.artifact_id:
+            ep = f'/artifact/{self.artifact_id}'
+        else:
+            ep = '/artifact'
+
+        return ep
+
+    @property
+    def data_key(self):
+        if self.artifact_id and not type(self.container_id) is list:
+            data_key = None
+        else:
+            data_key = 'data'
+
+        return data_key
+
 
 @dataclass
-class AuditQuery(PhantomQuery):
+class AuditQuery(Query):
     format: Optional[str] = None  # default json
     start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
     end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
@@ -114,6 +158,8 @@ class AuditQuery(PhantomQuery):
     container: Optional[Union[int, str, List[Union[int, str]]]] = None
 
     def __post_init__(self):
+        super().__post_init__()
+
         if self.user and type(self.user) is list:
             self.user = [str(u) for u in self.user]
             self.user = '%1E'.join(self.user)
@@ -132,7 +178,7 @@ class AuditQuery(PhantomQuery):
 
 
 @dataclass
-class ContainerQuery(PhantomQuery):
+class ContainerQuery(Query):
     container_id: Optional[Union[int, List[int]]] = None
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None

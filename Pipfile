@@ -45,7 +45,7 @@ tenacity = "*"
 toml = "*"
 
 [packages]
-#base-api-client = "*"
+base-api-client = "*"
 delorean = "*"
 
 [requires]

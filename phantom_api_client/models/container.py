@@ -18,15 +18,18 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
+import logging
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 from uuid import uuid4
 
 from copy import deepcopy
 
-from base_api_client.models.record import Record, sort_dict
-from phantom_api_client.models.artifact import ArtifactRequest
+from base_api_client.models import Record, sort_dict
+from phantom_api_client.models import ArtifactRequest
 from phantom_api_client.models.custom_fields import CustomFields
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -35,7 +38,7 @@ class ContainerRequest(Record):
     close_time: Union[str, None] = None
     container_type: Union[str, None] = 'default'
     custom_fields: Union[CustomFields, dict, None] = None
-    data: Union[dict, None] = None
+    data: Union[dict, None] = field(default_factory=dict)
     description: Union[str, None] = None
     due_time: Union[str, None] = None
     end_time: Union[str, None] = None
@@ -66,10 +69,10 @@ class ContainerRequest(Record):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
-        self.data = {'request_id': uuid4().hex}
+        self.data = {**self.data, 'request_id': uuid4().hex}
 
-    def update_id(self, id: int):
-        self.id = id
+    def update_id(self, container_id: int):
+        self.id = container_id
 
         if self.artifacts:
             for artifact in self.artifacts:
@@ -78,11 +81,11 @@ class ContainerRequest(Record):
         # todo: implement
         # if self.comments:
         #     for comment in self.comments:
-        #         comment.container_id = self.id
+        #         comment.container_id = self.artifact_id
         #
         # if self.attachments:
         #     for attachment in self.attachments:
-        #         attachment.container_id = self.id
+        #         attachment.container_id = self.artifact_id
 
     def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
