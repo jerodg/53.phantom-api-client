@@ -69,7 +69,10 @@ class ContainerRequest(Record):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
-        self.data = {**self.data, 'request_id': uuid4().hex}
+        try:
+            self.data = {**self.data, 'request_id': uuid4().hex}
+        except TypeError:
+            self.data = {'request_id': uuid4().hex}
 
     def update_id(self, container_id: int):
         self.id = container_id
@@ -81,11 +84,11 @@ class ContainerRequest(Record):
         # todo: implement
         # if self.comments:
         #     for comment in self.comments:
-        #         comment.container_id = self.artifact_id
+        #         comment.id = self.id
         #
         # if self.attachments:
         #     for attachment in self.attachments:
-        #         attachment.container_id = self.artifact_id
+        #         attachment.id = self.id
 
     def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
@@ -111,6 +114,10 @@ class ContainerRequest(Record):
             dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
         return dct
+
+    @property
+    def end_point(self):
+        return f'/container/{self.id}'
 
 
 if __name__ == '__main__':
