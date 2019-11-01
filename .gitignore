@@ -288,3 +288,6 @@ Temporary Items
 
 # MkDocs
 site/
+
+# Misc
+base_api_client/
