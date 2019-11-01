@@ -49,12 +49,16 @@ class Query(Record):
         https://my.phantom.us/4.1/docs/rest/query
     """
     page: Optional[int] = None
-    page_size: Optional[int] = 100000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
+    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
     pretty: Optional[Union[bool, int]] = None
     filter: Optional[Union[dict, None]] = None  # Gets converted to standard Phantom filters in __post_init__
     include_expensive: Optional[Union[bool, int]] = None
     sort: Optional[str] = None
     order: Optional[str] = None
+    # Extras
+    date_filter_start: Optional[Union[Delorean, str, None]] = None  # YYYY-MM-DDTHH:MM:SS.ffffff
+    date_filter_end: Optional[Union[Delorean, str, None]] = None
+    date_filter_field: Optional[str] = None  # One of:
 
     def __post_init__(self):
         if self.include_expensive or self.pretty:
@@ -70,13 +74,25 @@ class Query(Record):
             self.load(**self.filter)
             del self.filter
 
+        if self.date_filter_start:
+            self.date_filter_start = parse(self.date_filter_start, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_end:
+            self.date_filter_end = parse(self.date_filter_end, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_start and not self.date_filter_end:
+            self.date_filter_end = Delorean(timezone='UTC')
+
+        if self.date_filter_end and not self.date_filter_start:
+            self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
+
 
 @dataclass
 class ArtifactQuery(Query):
     """
     Valid Filter Fields
         case_artifact_map, cases, cef, cef_types, child_artifacts, container,
-        container_id, create_time, data, description, end_time, evidence,
+        id, create_time, data, description, end_time, evidence,
         has_note, hash, id, in_case, indicatorartifactrecord, indicators,
         ingest_app, ingest_app_id, kill_chain, label, name, note, owner,
         owner_id, parent_artifact, parent_artifact_id, parent_container,
@@ -85,10 +101,10 @@ class ArtifactQuery(Query):
         tags, type, update_time, version
 
     Args:
-        artifact_id (Optional[Union[int, List[int]]]):
-        container_id  (Optional[Union[int, List[int]]]):
+        id (Optional[Union[int, List[int]]]):
+        id  (Optional[Union[int, List[int]]]):
     """
-    artifact_id: Optional[Union[int, List[int]]] = None
+    id: Optional[Union[int, List[int]]] = None
     container_id: Optional[Union[int, List[int]]] = None
 
     def __post_init__(self):
@@ -107,12 +123,27 @@ class ArtifactQuery(Query):
             dct = deepcopy(self.__dict__)
 
         try:
-            del dct['artifact_id']
+            del dct['id']
         except KeyError:
             pass
 
         try:
             del dct['container_id']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_start']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
         except KeyError:
             pass
 
@@ -125,11 +156,11 @@ class ArtifactQuery(Query):
         return dct
 
     @property
-    def endpoint(self):
+    def end_point(self):
         if self.container_id:
             ep = f'/container/{self.container_id}/artifacts'
-        elif self.artifact_id:
-            ep = f'/artifact/{self.artifact_id}'
+        elif self.id:
+            ep = f'/artifact/{self.id}'
         else:
             ep = '/artifact'
 
@@ -137,7 +168,7 @@ class ArtifactQuery(Query):
 
     @property
     def data_key(self):
-        if self.artifact_id and not type(self.container_id) is list:
+        if self.id and not type(self.container_id) is list:
             data_key = None
         else:
             data_key = 'data'
@@ -179,13 +210,11 @@ class AuditQuery(Query):
 
 @dataclass
 class ContainerQuery(Query):
-    container_id: Optional[Union[int, List[int]]] = None
+    id: Optional[Union[int, List[int]]] = None
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None
     phases: Optional[Union[bool, int]] = None
-    date_filter_start: Optional[Union[Delorean, str, None]] = None  # YYYY-MM-DDTHH:MM:SS.ffffff
-    date_filter_end: Optional[Union[Delorean, str, None]] = None
-    date_filter_field: Optional[str] = None  # One of:
+    page_size = 100000  # Temp fix for Phantom < 4.5
 
     def __post_init__(self):
         super().__post_init__()
@@ -197,18 +226,6 @@ class ContainerQuery(Query):
 
         if self.phases:
             self.phases = 1
-
-        if self.date_filter_start:
-            self.date_filter_start = parse(self.date_filter_start, dayfirst=False, timezone='UTC')
-
-        if self.date_filter_end:
-            self.date_filter_end = parse(self.date_filter_end, dayfirst=False, timezone='UTC')
-
-        if self.date_filter_start and not self.date_filter_end:
-            self.date_filter_end = Delorean(timezone='UTC')
-
-        if self.date_filter_end and not self.date_filter_start:
-            self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
 
     def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
@@ -228,7 +245,7 @@ class ContainerQuery(Query):
             pass
 
         try:
-            del dct['container_id']
+            del dct['id']
         except KeyError:
             pass
 
@@ -261,7 +278,7 @@ class ContainerQuery(Query):
         return dct
 
     @property
-    def endpoint(self):
+    def end_point(self):
         try:
             if self.whitelist_candidates:
                 wlp = '/permitted_users'
@@ -272,14 +289,14 @@ class ContainerQuery(Query):
         except AttributeError:
             wlp = ''
 
-        if self.container_id:
-            if type(self.container_id) is list:
+        if self.id:
+            if type(self.id) is list:
                 if wlp:
                     raise InvalidCombinationError
-                self._filter_id__in = str(self.container_id)
+                self._filter_id__in = str(self.id)
                 ep = '/container'
             else:
-                ep = f'/container/{self.container_id}{wlp}'
+                ep = f'/container/{self.id}{wlp}'
         else:
             ep = '/container'
 
@@ -299,7 +316,7 @@ class ContainerQuery(Query):
         except AttributeError:
             wlp = ''
 
-        if self.container_id and not type(self.container_id) is list:
+        if self.id and not type(self.id) is list:
             data_key = None
         else:
             data_key = 'data'

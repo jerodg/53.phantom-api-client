@@ -53,7 +53,7 @@ async def test_update_containers_filtered() -> NoReturn:
 
         print('Updating Containers...')
 
-        requests = [ContainerRequest(id=i, label='mcafee') for i in [c['artifact_id'] for c in results.success]]
+        requests = [ContainerRequest(id=i, label='mcafee') for i in [c['id'] for c in results.success]]
 
         results = await pac.update_records(requests=requests)
 

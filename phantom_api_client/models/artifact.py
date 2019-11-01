@@ -58,7 +58,10 @@ class ArtifactRequest(Record):
         if type(self.cef) is Cef:
             self.cef = self.cef.dict()
 
-        self.data = {**self.data, 'request_id': uuid4().hex}
+        try:
+            self.data = {**self.data, 'request_id': uuid4().hex}
+        except TypeError:
+            self.data = {'request_id': uuid4().hex}
 
     def update_id(self, artifact_id: int):
         self.id = artifact_id
@@ -83,6 +86,10 @@ class ArtifactRequest(Record):
             dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
         return dct
+
+    @property
+    def end_point(self):
+        return f'/artifact/{self.id}'
 
 
 if __name__ == '__main__':
