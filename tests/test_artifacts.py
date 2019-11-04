@@ -115,26 +115,26 @@ async def test_get_one_artifact():
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
-@pytest.mark.asyncio
-async def test_get_all_artifacts():
-    ts = time.perf_counter()
-    bprint('Test: Get All Artifacts')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_record_count(ArtifactQuery())
-        count = results.success[0]['count']
-        assert count
-
-        results = await pac.get_records(ArtifactQuery())
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) == count
-        assert not results.failure
-
-        tprint(results, top=5)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+# @pytest.mark.asyncio
+# async def test_get_all_artifacts():
+#     ts = time.perf_counter()
+#     bprint('Test: Get All Artifacts')
+#
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         results = await pac.get_record_count(ArtifactQuery())
+#         count = results.success[0]['count']
+#         assert count
+#
+#         results = await pac.get_records(ArtifactQuery())
+#         # print(results)
+#
+#         assert type(results) is Results
+#         assert len(results.success) == count
+#         assert not results.failure
+#
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
 @pytest.mark.asyncio

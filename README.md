@@ -34,7 +34,7 @@ This modules primary use-case is inheritance from other REST API clients.
 ```python
 
 ```
-## API Implementation, Categories (2/24) ~8.3%, Functions (35/123) ~28.4%
+## API Implementation, Categories (2/24) ~8.3%, Functions (36/123) ~29.2%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -70,15 +70,15 @@ This modules primary use-case is inheritance from other REST API clients.
     - [ ] Delete Attachment
 - [ ] Audit:
     - [ ] Get One User Audit Data
-    - [ ] Get 'N' Users Audit Data
+    - [ ] Get Many Users Audit Data
     - [ ] Get One Role Audit Data
-    - [ ] Get 'N' Role Audit Data
+    - [ ] Get Many Role Audit Data
     - [ ] Get Authentication Audit Data
     - [ ] Get Administration Audit Data
     - [ ] Get One Playbook Audit Data
-    - [ ] Get 'N' Playbooks Audit Data
-    - [ ] Get One Container Audit Data
-    - [ ] Get 'N' Containers Audit Data
+    - [ ] Get Many Playbooks Audit Data
+    - [x] Get One Container Audit Data
+    - [ ] Get Many Containers Audit Data
     - [ ] Get All Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
@@ -191,22 +191,22 @@ platform linux, python 3.8.0-beta-3
 
 |   Name                                        |   Stmts   |   Miss    |  Cover   |
 |   ------------------------------------------  |--------   |-------    |-------:   |
-|   phantom_api_client/__init__.py              |       2   |      0    |   100%   |
-|   phantom_api_client/client.py                |     134   |     42    |    69%   |
-|   phantom_api_client/models/__init__.py       |      12   |      0    |   100%   |
-|   phantom_api_client/models/artifact.py       |      44   |     14    |    68%   |
+|   phantom_api_client/__init__.py              |       3   |      0    |   100%   |
+|   phantom_api_client/client.py                |      80   |      4    |    95%   |
+|   phantom_api_client/models/__init__.py       |      11   |      0    |   100%   |
+|   phantom_api_client/models/artifact.py       |      51   |      1    |    98%   |
 |   phantom_api_client/models/attachment.py     |      34   |     15    |    56%   |
 |   phantom_api_client/models/audit.py          |      27   |     27    |     0%   |
-|   phantom_api_client/models/cef.py            |     156   |      4    |    97%   |
+|   phantom_api_client/models/cef.py            |     159   |      3    |    98%   |
 |   phantom_api_client/models/comment.py        |       9   |      1    |    89%   |
-|   phantom_api_client/models/container.py      |      54   |      4    |    93%   |
-|   phantom_api_client/models/custom_fields.py  |      32   |      8    |    75%   |
+|   phantom_api_client/models/container.py      |      62   |      2    |    97%   |
+|   phantom_api_client/models/custom_fields.py  |      33   |      8    |    76%   |
 |   phantom_api_client/models/exceptions.py     |      22   |     12    |    45%   |
 |   phantom_api_client/models/note.py           |      12   |      1    |    92%   |
-|   phantom_api_client/models/phantomquery.py   |     165   |     45    |    73%   |
 |   phantom_api_client/models/pin.py            |      25   |     11    |    56%   |
+|   phantom_api_client/models/query.py          |     245   |     46    |    81%   |
 |   ____________________________________________    | ____  |   _____   |   ____    |
-|   TOTAL                                       |     728   |    184    |    75%   |
+|   TOTAL                                       |     773   |    131    |    83%   |
 
 ## Performance Notes
 Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM
