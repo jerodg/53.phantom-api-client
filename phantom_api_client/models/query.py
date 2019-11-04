@@ -211,36 +211,44 @@ class ArtifactQuery(Query):
         return data_key
 
 
-# @dataclass
-# class AuditQuery(Query):
-#     format: Optional[str] = None  # default json
-#     start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
-#     end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
-#     user: Optional[Union[int, str, List[Union[int, str]]]] = None
-#     role: Optional[Union[int, str, List[Union[int, str]]]] = None
-#     authentication: Optional[str] = None
-#     administration: Optional[str] = None
-#     playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
-#     container: Optional[Union[int, str, List[Union[int, str]]]] = None
-#
-#     def __post_init__(self):
-#         super().__post_init__()
-#
-#         if self.user and type(self.user) is list:
-#             self.user = [str(u) for u in self.user]
-#             self.user = '%1E'.join(self.user)
-#
-#         if self.role and type(self.role) is list:
-#             self.role = [str(r) for r in self.role]
-#             self.role = '%1E'.join(self.role)
-#
-#         if self.playbook and type(self.playbook) is list:
-#             self.playbook = [str(p) for p in self.playbook]
-#             self.playbook = '%1E'.join(self.playbook)
-#
-#         if self.container and type(self.container) is list:
-#             self.container = [str(c) for c in self.container]
-#             self.container = '%1E'.join(self.container)
+@dataclass
+class AuditQuery(Query):
+    format: Optional[str] = None  # default json
+    start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
+    end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
+    user: Optional[Union[int, str, List[Union[int, str]]]] = None
+    role: Optional[Union[int, str, List[Union[int, str]]]] = None
+    authentication: Optional[str] = None
+    administration: Optional[str] = None
+    playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
+    container: Optional[Union[int, str, List[Union[int, str]]]] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+
+        if self.user and type(self.user) is list:
+            self.user = [str(u) for u in self.user]
+            self.user = '%1E'.join(self.user)
+
+        if self.role and type(self.role) is list:
+            self.role = [str(r) for r in self.role]
+            self.role = '%1E'.join(self.role)
+
+        if self.playbook and type(self.playbook) is list:
+            self.playbook = [str(p) for p in self.playbook]
+            self.playbook = '%1E'.join(self.playbook)
+
+        if self.container and type(self.container) is list:
+            self.container = [str(c) for c in self.container]
+            self.container = '%1E'.join(self.container)
+
+    @property
+    def end_point(self):
+        return '/audit'
+
+    @property
+    def data_key(self):
+        return None
 
 
 @dataclass
@@ -249,7 +257,6 @@ class ContainerQuery(Query):
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None
     phases: Optional[Union[bool, int]] = None
-    page_size = 100000  # Temp fix for Phantom < 4.5
 
     def __post_init__(self):
         super().__post_init__()

@@ -91,17 +91,20 @@ class PhantomApiClient(BaseApiClient):
         logger.debug('-> Complete.')
         return await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
-    async def get_records(self, query: Union[ArtifactQuery, ContainerQuery]) -> Results:
+    async def get_records(self, query: Union[ArtifactQuery, AuditQuery, ContainerQuery]) -> Results:
         """
         Args:
             query (ContainerQuery):
 
         Returns:
             results (Results)"""
-        if not query.id:
-            page_limit = (await self.get_record_count(query)).success[0]['num_pages']
-        else:  # When we're getting a single container we can skip paging
+        if type(query) is AuditQuery:
             page_limit = 1
+        else:
+            if not query.id:
+                page_limit = (await self.get_record_count(query)).success[0]['num_pages']
+            else:  # When we're getting a single container we can skip paging
+                page_limit = 1
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.end_point,
@@ -220,58 +223,6 @@ class PhantomApiClient(BaseApiClient):
         container_results.failure.extend(artifact_results.failure)
 
         return container_results, containers
-
-    # async def get_user_count(self, query: Optional[Query] = None) -> Results:
-    #     if not query:
-    #         query = Query(type='ph_user', filter={'_filter_type__in': '["normal", "automation"]'}, page_size=1, page=0)
-    #
-    #     logger.debug('Getting user count...')
-    #
-    #     tasks = [asyncio.create_task(self.request(method='get',
-    #                                               end_point=query.type,
-    #                                               request_id=uuid4().hex,
-    #                                               params=query.dict()))]
-    #
-    #     results = Results(data=await asyncio.gather(*tasks))
-    #
-    #     logger.debug('-> Complete.')
-    #
-    #     return await self.process_results(results)
-
-    # async def get_users(self, user_id: Optional[int] = None, query: Optional[Query] = None) -> Results:
-    #     if user_id:
-    #         t = f'/ph_user/{user_id}'
-    #     else:
-    #         t = '/ph_user'
-    #
-    #     if not query:
-    #         query = Query(type=t)
-    #     elif not query.type:
-    #         query.type = t
-    #
-    #     if not user_id:
-    #         page_limit = (await self.get_user_count(query=query)).success[0]['num_pages']
-    #     else:  # When we're getting a single user we can skip paging
-    #         page_limit = 1
-    #
-    #     logger.debug(f'Getting user(s)...')
-    #
-    #     tasks = [asyncio.create_task(self.request(method='get',
-    #                                               end_point=query.type,
-    #                                               request_id=uuid4().hex,
-    #                                               params={**query.dict(), 'page': i}))
-    #              for i in range(0, page_limit)]
-    #
-    #     results = Results(data=await asyncio.gather(*tasks))
-    #
-    #     logger.debug('-> Complete.')
-    #
-    #     if user_id:
-    #         data_key = None
-    #     else:
-    #         data_key = 'data'
-    #
-    #     return await self.process_results(results, data_key)
 
     # async def get_audit_data(self, query: Optional[AuditQuery] = None) -> Results:
     #     """

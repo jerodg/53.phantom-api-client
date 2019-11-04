@@ -78,6 +78,7 @@ async def test_get_all_containers():
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
         results = await pac.get_record_count(query=ContainerQuery())
         count = results.success[0]['count']
+        print(f'Count: {count}')
 
         results = await pac.get_records(ContainerQuery())
         # print(results)
