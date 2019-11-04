@@ -224,37 +224,6 @@ class PhantomApiClient(BaseApiClient):
 
         return container_results, containers
 
-    # async def get_audit_data(self, query: Optional[AuditQuery] = None) -> Results:
-    #     """
-    #     If no audit data is returned for a valid user then no audit data is
-    #     present. Probably due to the user not having logged in before or a database reset.
-    #
-    #     Args:
-    #         query (Optional[Query]):
-    #
-    #     Returns:
-    #         results (Results)
-    #     """
-    #     logger.debug(f'Getting audit data...')
-    #
-    #     t = '/audit'
-    #
-    #     if not query:
-    #         query = AuditQuery(type=t)
-    #     elif not query.type:
-    #         query.type = t
-    #
-    #     tasks = [asyncio.create_task(self.request(method='get',
-    #                                               end_point=query.type,
-    #                                               request_id=uuid4().hex,
-    #                                               params=query.dict()))]
-    #
-    #     results = Results(data=await asyncio.gather(*tasks))
-    #
-    #     logger.debug('-> Complete.')
-    #
-    #     return await self.process_results(results)
-
 
 if __name__ == '__main__':
     print(__doc__)

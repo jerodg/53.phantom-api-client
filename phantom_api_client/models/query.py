@@ -342,7 +342,7 @@ class ContainerQuery(Query):
         else:
             ep = '/container'
 
-        logger.debug(f'Getting container(s) {"phases" if wlp == "/phases" else ""}...')
+        logger.debug(f'Getting container {self.id}, {"phases" if wlp == "/phases" else ""}...')
 
         return ep
 
@@ -374,12 +374,12 @@ class ContainerQuery(Query):
 @dataclass
 class UserQuery(Query):
     id: int = None
-    include_automation: bool = True
 
     def __post_init__(self):
-        if self.include_automation:
-            self._filter_type__in = '["normal", "automation"]'
-            del self.include_automation
+        if not self.filter:
+            self.filter = {'_filter_type__in': '["normal", "automation"]'}
+
+        super().__post_init__()
 
     @property
     def end_point(self):
