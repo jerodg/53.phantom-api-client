@@ -34,7 +34,7 @@ This modules primary use-case is inheritance from other REST API clients.
 ```python
 
 ```
-## API Implementation, Categories (2/24) ~8.3%, Functions (32/123) ~26.0%
+## API Implementation, Categories (2/24) ~8.3%, Functions (35/123) ~28.4%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -44,7 +44,7 @@ This modules primary use-case is inheritance from other REST API clients.
     - [ ] Delete Rule
 - [ ] Apps:
     - [ ] Install App    
-- [ ] Artifacts: (16/16) 100.0%
+- [x] Artifacts: (16/16) 100.0%
     - [x] Get All Artifacts Count
     - [x] Get All Artifacts Count Filtered
     - [x] Get One Container Artifacts Count    
@@ -169,9 +169,9 @@ This modules primary use-case is inheritance from other REST API clients.
     - [ ] Create Tenant
     - [ ] Update Tenant
 - [ ] Users:
-    - [ ] Get Users Count
-    - [ ] Get One User
-    - [ ] Get All Users
+    - [x] Get Users Count
+    - [x] Get All Users
+    - [x] Get One User
     - [ ] Create One User
     - [ ] Update One User
     - [ ] Delete One User

@@ -67,7 +67,7 @@ class PhantomApiClient(BaseApiClient):
                            parse(r[query.date_filter_field], dayfirst=False) <= query.date_filter_end]
         return results
 
-    async def get_record_count(self, query: Union[ArtifactQuery, AuditQuery, ContainerQuery]) -> Results:
+    async def get_record_count(self, query: Union[ArtifactQuery, ContainerQuery, UserQuery]) -> Results:
         """
         Performs a single page query to get the 'results_count' & 'num_paqges' based on specified Query.
         Args:

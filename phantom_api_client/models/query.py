@@ -86,6 +86,41 @@ class Query(Record):
         if self.date_filter_end and not self.date_filter_start:
             self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
 
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
+
+        try:
+            del dct['date_filter_start']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
+        except KeyError:
+            pass
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
+
 
 @dataclass
 class ArtifactQuery(Query):
@@ -176,36 +211,36 @@ class ArtifactQuery(Query):
         return data_key
 
 
-@dataclass
-class AuditQuery(Query):
-    format: Optional[str] = None  # default json
-    start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
-    end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
-    user: Optional[Union[int, str, List[Union[int, str]]]] = None
-    role: Optional[Union[int, str, List[Union[int, str]]]] = None
-    authentication: Optional[str] = None
-    administration: Optional[str] = None
-    playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
-    container: Optional[Union[int, str, List[Union[int, str]]]] = None
-
-    def __post_init__(self):
-        super().__post_init__()
-
-        if self.user and type(self.user) is list:
-            self.user = [str(u) for u in self.user]
-            self.user = '%1E'.join(self.user)
-
-        if self.role and type(self.role) is list:
-            self.role = [str(r) for r in self.role]
-            self.role = '%1E'.join(self.role)
-
-        if self.playbook and type(self.playbook) is list:
-            self.playbook = [str(p) for p in self.playbook]
-            self.playbook = '%1E'.join(self.playbook)
-
-        if self.container and type(self.container) is list:
-            self.container = [str(c) for c in self.container]
-            self.container = '%1E'.join(self.container)
+# @dataclass
+# class AuditQuery(Query):
+#     format: Optional[str] = None  # default json
+#     start: Optional[str] = None  # ISO 8601 Date|Date-Time; Default 30 days prior
+#     end: Optional[str] = None  # ISO 8601 Date|Date-Time; Default now
+#     user: Optional[Union[int, str, List[Union[int, str]]]] = None
+#     role: Optional[Union[int, str, List[Union[int, str]]]] = None
+#     authentication: Optional[str] = None
+#     administration: Optional[str] = None
+#     playbook: Optional[Union[int, str, List[Union[int, str]]]] = None
+#     container: Optional[Union[int, str, List[Union[int, str]]]] = None
+#
+#     def __post_init__(self):
+#         super().__post_init__()
+#
+#         if self.user and type(self.user) is list:
+#             self.user = [str(u) for u in self.user]
+#             self.user = '%1E'.join(self.user)
+#
+#         if self.role and type(self.role) is list:
+#             self.role = [str(r) for r in self.role]
+#             self.role = '%1E'.join(self.role)
+#
+#         if self.playbook and type(self.playbook) is list:
+#             self.playbook = [str(p) for p in self.playbook]
+#             self.playbook = '%1E'.join(self.playbook)
+#
+#         if self.container and type(self.container) is list:
+#             self.container = [str(c) for c in self.container]
+#             self.container = '%1E'.join(self.container)
 
 
 @dataclass
@@ -324,6 +359,35 @@ class ContainerQuery(Query):
         if wlp == '/permitted_users':
             data_key = 'users'
         elif wlp == '/phases':
+            data_key = 'data'
+
+        return data_key
+
+
+@dataclass
+class UserQuery(Query):
+    id: int = None
+    include_automation: bool = True
+
+    def __post_init__(self):
+        if self.include_automation:
+            self._filter_type__in = '["normal", "automation"]'
+            del self.include_automation
+
+    @property
+    def end_point(self):
+        if self.id:
+            ep = f'/ph_user/{self.id}'
+        else:
+            ep = '/ph_user'
+
+        return ep
+
+    @property
+    def data_key(self):
+        if self.id and not type(self.id) is list:
+            data_key = None
+        else:
             data_key = 'data'
 
         return data_key
