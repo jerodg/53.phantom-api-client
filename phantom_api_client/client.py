@@ -153,7 +153,6 @@ class PhantomApiClient(BaseApiClient):
 
         Returns:
             results (Results)"""
-        # todo: update to use end_point property
         logger.debug(f'Updating record(s)...')
 
         if not type(requests) is list:
