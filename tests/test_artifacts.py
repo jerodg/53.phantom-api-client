@@ -115,6 +115,7 @@ async def test_get_one_artifact():
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
+# fixme: This usually fails (time-out); phantoms fault
 # @pytest.mark.asyncio
 # async def test_get_all_artifacts():
 #     ts = time.perf_counter()
@@ -297,6 +298,36 @@ async def test_create_many_artifacts():
         assert response_results.success[0]['success']
 
         tprint(response_results, request_results, top=5)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+
+
+@pytest.mark.asyncio
+async def test_create_many_artifacts():
+    ts = time.perf_counter()
+    bprint('Test: Create Many Artifacts')
+
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
+        container = generate_container(artifact_count=2)
+        results = await pac.get_records(ContainerQuery(filter={'_filter_tenant': 2}))
+        ids = [c['id'] for c in results.success]
+        cid = choice(ids)
+
+        print(f'Container: {cid}')
+
+        container[0].update_id(cid)
+        response_results, request_results = await pac.create_artifacts(container)
+        # print(response_results)
+
+        assert type(response_results) is Results
+        assert len(request_results) == 1
+        assert len(response_results.success) == 2
+        assert not response_results.failure
+        assert response_results.success[0]['success']
+
+        tprint(response_results, request_results, top=5)
+
+        # todo: check for creation within phantom
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
