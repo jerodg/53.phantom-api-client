@@ -36,17 +36,19 @@ logger = logging.getLogger(__name__)
 class Query(Record):
     """
     Attributes:
-        type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node|ph_user
-        page (int): page number to retrieve
-        page_size (int): how many results per page
-        pretty (bool): pretty format results
-        filter (dict): {'_filter_name__icontains': 'test'}
-        include_expensive (bool): return all fields
-        sort (str): field_name to sort on
-        order (str): asc|desc; default desc
+        page (Optional[int]): page number to retrieve
+        page_size (Optional[int]): how many results per page
+        pretty (Optional[Union[bool, int]]): pretty format results
+        filter (Optional[Union[dict, None]]): {'_filter_name__icontains': 'test'}
+        include_expensive (Optional[Union[bool, int]]): return all fields
+        sort (Optional[str]): field_name to sort on
+        order (Optional[str]): asc|desc; default desc
+        date_filter_start (Union[Delorean, str]):
+        date_filter_end (Union[Delorean, str]):
+        date_filter_field: (Optional[str])
 
     References:
-        https://my.phantom.us/4.1/docs/rest/query
+        https://my.phantom.us/4.6/docs/rest/query
     """
     page: Optional[int] = None
     page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
