@@ -30,7 +30,7 @@ from tests.extras.generate_objects import generate_container
 
 
 @pytest.mark.asyncio
-async def test_get__all_containers_count():
+async def test_get_all_containers_count():
     ts = time.perf_counter()
     bprint('Test: Get All Containers Count')
 
@@ -75,16 +75,17 @@ async def test_get_all_containers():
     ts = time.perf_counter()
     bprint('Test: Get All Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_record_count(query=ContainerQuery())
-        count = results.success[0]['count']
-        print(f'Count: {count}')
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
+        # results = await pac.get_record_count(query=ContainerQuery(filter={'_filter_container_type': '"case"'}))
+        # count = results.success[0]['count']
+        # print(f'Count: {count}')
 
-        results = await pac.get_records(ContainerQuery())
+        # results = await pac.get_records(ContainerQuery())
+        results = await pac.get_records(query=ContainerQuery(page_size=100000, filter={'_filter_container_type': '"case"'}))
         # print(results)
 
         assert type(results) is Results
-        assert len(results.success) == count
+        # assert len(results.success) == count
         assert not results.failure
 
         tprint(results, top=5)
@@ -256,7 +257,7 @@ async def test_create_one_container():
     ts = time.perf_counter()
     bprint('Test: Create One Container')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
         response_results, request_results = await pac.create_containers(generate_container())
         # print(response_results)
 

@@ -63,7 +63,6 @@ class ContainerRequest(Record):
     # todo: implement
     # comments: List[Comment] = field(default_factory=list)
     # attachments: List[Attachment] = field(default_factory=list)
-    # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
