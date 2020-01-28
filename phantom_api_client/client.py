@@ -98,6 +98,8 @@ class PhantomApiClient(BaseApiClient):
 
         Returns:
             results (Results)"""
+        logger.debug(f'Getting {type(query)}, record(s)...')
+
         if type(query) is AuditQuery:
             page_limit = 1
         else:
@@ -121,7 +123,7 @@ class PhantomApiClient(BaseApiClient):
 
         return results
 
-    async def delete_records(self, query: List[Union[ArtifactQuery, ContainerQuery]]) -> Results:
+    async def delete_records(self, query: Union[List[ArtifactQuery], List[ContainerQuery]]) -> Results:
         """
 
         Args:
