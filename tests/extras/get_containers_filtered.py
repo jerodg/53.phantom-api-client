@@ -19,7 +19,6 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import datetime as dt
 import time
-from typing import NoReturn
 
 import pytest
 from delorean import Delorean, parse
@@ -47,16 +46,22 @@ def filter_by_date(results: Results) -> list:
 
 
 @pytest.mark.asyncio
-async def test_delete_containers() -> NoReturn:
+async def test_get_all_containers_filtered():
     ts = time.perf_counter()
+    bprint('Test: Get All Containers Filtered')
 
-    bprint('Test: Delete Containers')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
-        # Get containers
-        # f = {'_filter_name__icontains': '"bricata"', '_filter_tenant': 0}
-        f = {'_filter_tenant': 1}
+        # f = {'_filter_container_type': '"case"'}
+        f = {'_filter_tenant': 0}
+        # results = await pac.get_container_count(query=ContainerQuery(filter=f))
+        # count = results.success[0]['count']
+        # print('count:', count)
+
         results = await pac.get_containers(query=ContainerQuery(filter=f))
-        # print('results:', len(results.success))
+        # print(results)
+
+        ids = list(set([r['id'] for r in results.success]))
+        print('unique_ids:', len(ids))
 
         assert type(results) is Results
         assert len(results.success) >= 1
@@ -64,25 +69,10 @@ async def test_delete_containers() -> NoReturn:
 
         tprint(results, top=5)
 
-        print('Deleting containers...')
-        filtered_ids = filter_by_date(results)
-
-        # results1 = await pac.delete_records(record_ids=filtered_ids, query=Query(type='container'))
-        #
-        # assert type(results1) is Results
-        # assert not results1.failure
-        #
-        # tprint(results1, top=5)
-
-        # # Verify test containers have been deleted
-        # results2 = await pac.get_containers(Query(type='container', filter=f))
-        # record_ids = filter_by_date(results2.success)
-        # # print('results2', results2)
-        #
-        # assert type(results2) is Results
-        # assert len(record_ids) == 0
-        # assert not results2.failure
-        #
-        # tprint(results2, top=5)
+        # dedup = frozenset(item.items()), item) for item in results.sucess)
+        # dedup = (frozenset(item.items()),item for item in results.success)
+        # dedup = dict((frozenset(item.items()), item) for item in results.success).values()
+        # print('tdedsup', type(dedup))
+        # print('dedup0', dedup[0])
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

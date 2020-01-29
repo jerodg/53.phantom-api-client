@@ -46,6 +46,6 @@ class AuditRecord(Record):
 
     def __post_init__(self):
         self.record = {k.lower().replace(' ', '_'): v for k, v in self.record.items()}
-        super(AuditRecord, self).load(self.record)
+        super(AuditRecord, self).load(**self.record)
         del self.record
         # todo: convert datetime, populate fields

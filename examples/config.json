@@ -10,7 +10,10 @@
   },
   "Options": {
     "CAPath": "",
-    "VerifySSL": true
+    "VerifySSL": true,
+    "Debug": false,
+    "SEM": 15,
+    "Content_Type": "application/json; charset=utf-8"
   },
   "Proxy": {
     "URI": "",

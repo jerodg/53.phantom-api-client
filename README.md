@@ -6,10 +6,10 @@
 ```
 
 ![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
-![python](https://img.shields.io/badge/Python-3.7/8%2B-blue.svg)
+![python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
 ![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg)
 <a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-![0%](https://img.shields.io/badge/Coverage-%25-red.svg)
+![0%](https://img.shields.io/badge/Coverage-75%25-red.svg)
 <a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
 
 # Splunk-Phantom, API client.
@@ -18,7 +18,7 @@ Client library for Phantom's REST API.
 Developed for use with Phantom v4.5+, however, most functionality *should work 
 with previous versions.
 
-Developed fro use with Python3.8+, however, it should work with 3.6/7+. There is
+Developed for use with Python3.8+, however, it should work with 3.6/7+. There is
 no guarantee that future development won't utilize 3.8+ specifc syntax.
 
 __*Not Affiliated with Splunk or Phantom__
@@ -29,14 +29,12 @@ pip install phantom-api-client
 ```
 
 ## Basic Usage
-This modules' primary use-case is inheritance from other REST API clients.
+This modules primary use-case is inheritance from other REST API clients.
 
 ```python
 
 ```
-
-## API Implementation, Categories (2/24) ~8.3%/Functions (30/116) ~25.9%
-__*These should match unit tests.__
+## API Implementation, Categories (2/24) ~8.3%, Functions (36/123) ~29.2%
 - [ ] Actions:
     - [ ] Run Action
     - [ ] Cancel Running Action
@@ -46,18 +44,23 @@ __*These should match unit tests.__
     - [ ] Delete Rule
 - [ ] Apps:
     - [ ] Install App    
-- [x] Artifacts:
+- [x] Artifacts: (16/16) 100.0%
     - [x] Get All Artifacts Count
-    - [x] Get Container Artifacts Count
-    - [x] Get All Artifacts
-    - [x] Get One Artifact
-    - [x] Get All Container Artifacts    
+    - [x] Get All Artifacts Count Filtered
+    - [x] Get One Container Artifacts Count    
+    - [x] Get One Artifact    
+    - [x] Get All Artifacts    
+    - [x] Get All Artifacts Filtered    
+    - [x] Get All Artifacts Date-Filtered
+    - [x] Get All Container Artifacts
+    - [x] Get All Container Artifacts Date-Filtered
     - [x] Create One Artifact
-    - [x] Create Artifacts
-    - [x] Update Artifact
-    - [x] Update Artifacts
+    - [x] Create Many Artifacts
+    - [x] Update One Artifact
+    - [x] Update Many Artifacts
     - [x] Delete One Artifact
-    - [x] Delete Artifacts
+    - [x] Delete Many Artifacts
+    - [x] Delete All Container Artifacts    
 - [ ] Assets:
     - [ ] Create Assets
 - [ ] Attachments:
@@ -67,15 +70,15 @@ __*These should match unit tests.__
     - [ ] Delete Attachment
 - [ ] Audit:
     - [ ] Get One User Audit Data
-    - [ ] Get 'N' Users Audit Data
+    - [ ] Get Many Users Audit Data
     - [ ] Get One Role Audit Data
-    - [ ] Get 'N' Role Audit Data
+    - [ ] Get Many Role Audit Data
     - [ ] Get Authentication Audit Data
     - [ ] Get Administration Audit Data
     - [ ] Get One Playbook Audit Data
-    - [ ] Get 'N' Playbooks Audit Data
+    - [ ] Get Many Playbooks Audit Data
     - [x] Get One Container Audit Data
-    - [x] Get 'N' Containers Audit Data
+    - [ ] Get Many Containers Audit Data
     - [ ] Get All Audit Data
 - [ ] CEF:
     - [ ] Get Available CEFs
@@ -86,20 +89,23 @@ __*These should match unit tests.__
     - [ ] Delete Custom CEF
 - [ ] Clustering:
     - [ ] Get Nodes
-- [x] Containers:
-    - [x] Get Containers Count
-    - [x] Get Containers Count Filtered
+- [x] Containers: (16/16) 100%
+    - [x] Get All Containers Count
+    - [x] Get All Containers Count Filtered
     - [x] Get All Containers
     - [x] Get All Containers Filtered
+    - [x] Get All Containers Date Filtered (Custom Date Filtering)
     - [x] Get One Container
+    - [x] Get One Container Whitelist Users
+    - [x] Get One Container Whitelist Candidates
+    - [x] Get One Container Phases    
+    - [x] Get Many Containers
     - [x] Create One Container
-    - [x] Create Containers
-    - [x] Update Container
-    - [x] Update Containers
-    - [x] Delete Container
-    - [x] Delete Containers
-    - [x] Get Container Whitelisted Users
-    - [x] Get Whitelist Candidates (users who can view a container)
+    - [x] Create Many Containers
+    - [x] Update One Container
+    - [x] Update Many Containers
+    - [x] Delete One Container
+    - [x] Delete Many Containers
 - [ ] Custom Lists:
     - [ ] Get List
     - [ ] Create List
@@ -164,11 +170,11 @@ __*These should match unit tests.__
     - [ ] Update Tenant
 - [ ] Users:
     - [x] Get Users Count
-    - [x] Get One User
     - [x] Get All Users
+    - [x] Get One User
     - [ ] Create One User
     - [ ] Update One User
-    - [x] Delete One User
+    - [ ] Delete One User
     - [ ] Create Role/Permissions
 - [ ] Workbooks (formerly known as Case Templates):
     - [ ] Create Case Workflow Template
@@ -177,6 +183,30 @@ __*These should match unit tests.__
     - [ ] Add Phase Template to Workflow Template
     - [ ] Add Task to Phase Template 
     - [ ] Get Workbook Phases
+    
+## Test Coverage
+
+platform linux, python 3.8.0-beta-3
+-
+
+|   Name                                        |   Stmts   |   Miss    |  Cover   |
+|   ------------------------------------------  |--------   |-------    |-------:   |
+|   phantom_api_client/__init__.py              |       3   |      0    |   100%   |
+|   phantom_api_client/client.py                |      80   |      4    |    95%   |
+|   phantom_api_client/models/__init__.py       |      11   |      0    |   100%   |
+|   phantom_api_client/models/artifact.py       |      51   |      1    |    98%   |
+|   phantom_api_client/models/attachment.py     |      34   |     15    |    56%   |
+|   phantom_api_client/models/audit.py          |      27   |     27    |     0%   |
+|   phantom_api_client/models/cef.py            |     159   |      3    |    98%   |
+|   phantom_api_client/models/comment.py        |       9   |      1    |    89%   |
+|   phantom_api_client/models/container.py      |      62   |      2    |    97%   |
+|   phantom_api_client/models/custom_fields.py  |      33   |      8    |    76%   |
+|   phantom_api_client/models/exceptions.py     |      22   |     12    |    45%   |
+|   phantom_api_client/models/note.py           |      12   |      1    |    92%   |
+|   phantom_api_client/models/pin.py            |      25   |     11    |    56%   |
+|   phantom_api_client/models/query.py          |     245   |     46    |    81%   |
+|   ____________________________________________    | ____  |   _____   |   ____    |
+|   TOTAL                                       |     773   |    131    |    83%   |
 
 ## Performance Notes
 Phantom v4.2.7532 | Intel(R) Xeon(R) CPU E7-8860 v4 @ 2.20GHz (8 Cores VMWare) | 32GB RAM
@@ -232,6 +262,18 @@ More than 100 simultaneous connections/queries results in missing records.
 ## Documentation
 [GitHub Pages](https://jerodg.github.io/phantom-api-client/)
 - Work in Process
+
+## Known Issues
+Mass deleting records quits early with timeout error. It would seem the more 
+records that are being deleted adds an exponential increase in wait between 
+deletes. So far in testing >= 47 (254) 114 at once results in timeout-error.
+
+
+Phantom v4.2 and earlier has completely broken pagination. You will receive 
+duplicate and missing records. You should set the query filter 'page_size' to 
+a number greater than the max expected results in order to receive all records 
+in a single page.
+
 
 ## License
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>

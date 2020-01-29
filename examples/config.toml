@@ -1,4 +1,4 @@
-#Bricata API Client: Example Configuration
+#Phantom API Client: Example Configuration
 #Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 #This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,9 @@
 [Options]
     CAPath = ""  # Full path to Certificate Authority file
     VerifySSL = true
+    Debug = false
+    SEM = 15
+    Content_Type = "application/json; charset=utf-8"
 
 [Proxy]  # Optional
     URI = ""

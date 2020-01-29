@@ -33,7 +33,7 @@ async def test_get_one_container_audit_data():
     bprint('Test: Get One Container Audit Data')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_audit_data(query=AuditQuery(container=119109))
+        results = await pac.get_records(query=AuditQuery(container=130416))
         # print(results)
 
         assert type(results) is Results
@@ -45,55 +45,55 @@ async def test_get_one_container_audit_data():
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
-@pytest.mark.asyncio
-async def test_get_n_containers_audit_data():
-    ts = time.perf_counter()
-    bprint('Test: Get "N" Containers Audit Data')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_audit_data(query=AuditQuery(container=[119109, 119108]))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results, top=5)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
-async def test_get_one_user_audit_data():
-    ts = time.perf_counter()
-    bprint('Test: Get One User Audit Data')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_audit_data(query=AuditQuery(user=5))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results, top=5)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
-async def test_get_n_users_audit_data():
-    ts = time.perf_counter()
-    bprint('Test: Get "N" Users Audit Data')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_audit_data(query=AuditQuery(user=[5, 8]))
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results, top=5)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+# @pytest.mark.asyncio
+# async def test_get_n_containers_audit_data():
+#     ts = time.perf_counter()
+#     bprint('Test: Get "N" Containers Audit Data')
+#
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         results = await pac.get_audit_data(query=AuditQuery(container=[119109, 119108]))
+#         # print(results)
+#
+#         assert type(results) is Results
+#         assert len(results.success) >= 1
+#         assert not results.failure
+#
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+#
+#
+# @pytest.mark.asyncio
+# async def test_get_one_user_audit_data():
+#     ts = time.perf_counter()
+#     bprint('Test: Get One User Audit Data')
+#
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         results = await pac.get_audit_data(query=AuditQuery(user=5))
+#         # print(results)
+#
+#         assert type(results) is Results
+#         assert len(results.success) >= 1
+#         assert not results.failure
+#
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+#
+#
+# @pytest.mark.asyncio
+# async def test_get_n_users_audit_data():
+#     ts = time.perf_counter()
+#     bprint('Test: Get "N" Users Audit Data')
+#
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#         results = await pac.get_audit_data(query=AuditQuery(user=[5, 8]))
+#         # print(results)
+#
+#         assert type(results) is Results
+#         assert len(results.success) >= 1
+#         assert not results.failure
+#
+#         tprint(results, top=5)
+#
+#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

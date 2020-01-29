@@ -21,10 +21,11 @@ import time
 
 import pytest
 from os import getenv
+from random import choice
 
 from base_api_client import bprint, Results, tprint
-from phantom_api_client import PhantomApiClient
-from phantom_api_client.models import Query
+from phantom_api_client.client import PhantomApiClient
+from phantom_api_client.models import UserQuery
 
 
 @pytest.mark.asyncio
@@ -33,31 +34,11 @@ async def test_get_user_count():
 
     bprint('Test: Get User Count')
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_user_count()
+        results = await pac.get_record_count(query=UserQuery())
         # print(results)
 
         assert type(results) is Results
         assert len(results.success) >= 1
-        assert not results.failure
-
-        tprint(results)
-
-    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-
-
-@pytest.mark.asyncio
-async def test_get_one_user():
-    # This needs test containers/containers created; see test_containers.py
-    ts = time.perf_counter()
-    bprint('Test: Get One User')
-
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_users(user_id=5)
-
-        # print(results)
-
-        assert type(results) is Results
-        assert len(results.success) == 1
         assert not results.failure
 
         tprint(results)
@@ -71,10 +52,10 @@ async def test_get_all_users():
     bprint('Test: Get All Users')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_user_count()
+        results = await pac.get_record_count(query=UserQuery())
         count = results.success[0]['count']
 
-        results = await pac.get_users(query=Query(filter={'_filter_type__in': '["normal", "automation"]'}))
+        results = await pac.get_records(query=UserQuery())
         # print(results)
 
         assert type(results) is Results
@@ -87,15 +68,18 @@ async def test_get_all_users():
 
 
 @pytest.mark.asyncio
-async def test_delete_one_user():
+async def test_get_one_user():
     # This needs test containers/containers created; see test_containers.py
     ts = time.perf_counter()
-    bprint('Test: Delete One User')
+    bprint('Test: Get One User')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.delete_records(ids=13, query=Query(type='ph_user'))
-
+        results = await pac.get_records(query=UserQuery())
+        uids = [u['id'] for u in results.success]
+        uid = choice(uids)
         # print(results)
+
+        results = await pac.get_records(query=UserQuery(id=uid))
 
         assert type(results) is Results
         assert len(results.success) == 1

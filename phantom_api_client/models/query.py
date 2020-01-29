@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Phantom API Client: Models.Filter
+"""Phantom API Client: Models.Query
 Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -18,47 +18,51 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
+import datetime as dt
+import logging
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-import re
+from copy import deepcopy
+from delorean import Delorean, parse
 
-from base_api_client.models.record import Record
+from base_api_client.models import Record, sort_dict
+from phantom_api_client.models import InvalidCombinationError
 
-CARE = re.compile(r'container/\d+/artifacts')
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Query(Record):
     """
     Attributes:
-        type (str): action_run|artifact|asset|app|app_run|container|playbook_run|cluster_node|ph_user
-        page (int): page number to retrieve
-        page_size (int): how many results per page
-        pretty (bool): pretty format results
-        filter (dict): {'_filter_name__icontains': 'test'}
-        include_expensive (bool): return all fields
-        sort (str): field_name to sort on
-        order (str): asc|desc; default desc
+        page (Optional[int]): page number to retrieve
+        page_size (Optional[int]): how many results per page
+        pretty (Optional[Union[bool, int]]): pretty format results
+        filter (Optional[Union[dict, None]]): {'_filter_name__icontains': 'test'}
+        include_expensive (Optional[Union[bool, int]]): return all fields
+        sort (Optional[str]): field_name to sort on
+        order (Optional[str]): asc|desc; default desc
+        date_filter_start (Union[Delorean, str]):
+        date_filter_end (Union[Delorean, str]):
+        date_filter_field: (Optional[str])
 
     References:
-        https://my.phantom.us/4.1/docs/rest/query
+        https://my.phantom.us/4.6/docs/rest/query
     """
-    type: Optional[str] = None
     page: Optional[int] = None
-    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore)
+    page_size: Optional[int] = 1000  # Optimal page size (depends on semaphore); Change to 1000 after upgrade.
     pretty: Optional[Union[bool, int]] = None
     filter: Optional[Union[dict, None]] = None  # Gets converted to standard Phantom filters in __post_init__
     include_expensive: Optional[Union[bool, int]] = None
     sort: Optional[str] = None
     order: Optional[str] = None
+    # Extras
+    date_filter_start: Optional[Union[Delorean, str, None]] = None  # YYYY-MM-DDTHH:MM:SS.ffffff
+    date_filter_end: Optional[Union[Delorean, str, None]] = None
+    date_filter_field: Optional[str] = None  # One of:
 
     def __post_init__(self):
-        # todo: regex matching
-        # type_opts = ['ph_user', 'artifact']
-        # if self.type not in type_opts:
-        #     raise InvalidOptionError
-
         if self.include_expensive or self.pretty:
             self.page_size = 500
 
@@ -72,22 +76,141 @@ class Query(Record):
             self.load(**self.filter)
             del self.filter
 
-        if self.type and not self.type.startswith('/'):
-            self.type = f'/{self.type}'
+        if self.date_filter_start:
+            self.date_filter_start = parse(self.date_filter_start, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_end:
+            self.date_filter_end = parse(self.date_filter_end, dayfirst=False, timezone='UTC')
+
+        if self.date_filter_start and not self.date_filter_end:
+            self.date_filter_end = Delorean(timezone='UTC')
+
+        if self.date_filter_end and not self.date_filter_start:
+            self.date_filter_start = Delorean(datetime=dt.datetime(2000, 1, 1), timezone='UTC')
+
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
+
+        try:
+            del dct['date_filter_start']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
+        except KeyError:
+            pass
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
 
 
 @dataclass
-class ContainerQuery(Query):
-    _annotation_whitelist_users: Optional[Union[bool, int]] = None
-    whitelist_candidates: Optional[Union[bool, int]] = None
+class ArtifactQuery(Query):
+    """
+    Valid Filter Fields
+        case_artifact_map, cases, cef, cef_types, child_artifacts, container,
+        id, create_time, data, description, end_time, evidence,
+        has_note, hash, id, in_case, indicatorartifactrecord, indicators,
+        ingest_app, ingest_app_id, kill_chain, label, name, note, owner,
+        owner_id, parent_artifact, parent_artifact_id, parent_container,
+        parent_container_id, playbook_run, playbook_run_id, severity,
+        severity_id, source_artifact_map, source_data_identifier, start_time,
+        tags, type, update_time, version
+
+    Args:
+        id (Optional[Union[int, List[int]]]):
+        id  (Optional[Union[int, List[int]]]):
+    """
+    id: Optional[Union[int, List[int]]] = None
+    container_id: Optional[Union[int, List[int]]] = None
 
     def __post_init__(self):
         super().__post_init__()
-        if self._annotation_whitelist_users:
-            self._annotation_whitelist_users = 1
 
-        if self.whitelist_candidates:
-            self.whitelist_candidates = 1
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
+
+        try:
+            del dct['id']
+        except KeyError:
+            pass
+
+        try:
+            del dct['container_id']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_start']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
+        except KeyError:
+            pass
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
+
+    @property
+    def end_point(self):
+        if self.container_id:
+            ep = f'/container/{self.container_id}/artifacts'
+        elif self.id:
+            ep = f'/artifact/{self.id}'
+        else:
+            ep = '/artifact'
+
+        return ep
+
+    @property
+    def data_key(self):
+        if self.id and not type(self.container_id) is list:
+            data_key = None
+        else:
+            data_key = 'data'
+
+        return data_key
 
 
 @dataclass
@@ -104,6 +227,7 @@ class AuditQuery(Query):
 
     def __post_init__(self):
         super().__post_init__()
+
         if self.user and type(self.user) is list:
             self.user = [str(u) for u in self.user]
             self.user = '%1E'.join(self.user)
@@ -119,6 +243,163 @@ class AuditQuery(Query):
         if self.container and type(self.container) is list:
             self.container = [str(c) for c in self.container]
             self.container = '%1E'.join(self.container)
+
+    @property
+    def end_point(self):
+        return '/audit'
+
+    @property
+    def data_key(self):
+        return None
+
+
+@dataclass
+class ContainerQuery(Query):
+    id: Optional[Union[int, List[int]]] = None
+    _annotation_whitelist_users: Optional[Union[bool, int]] = None
+    whitelist_candidates: Optional[Union[bool, int]] = None
+    phases: Optional[Union[bool, int]] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self._annotation_whitelist_users:
+            self._annotation_whitelist_users = 1
+
+        if self.whitelist_candidates:
+            self.whitelist_candidates = 1
+
+        if self.phases:
+            self.phases = 1
+
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        if not dct:
+            dct = deepcopy(self.__dict__)
+
+        try:
+            del dct['phases']
+        except KeyError:
+            pass
+
+        try:
+            del dct['id']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_start']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_end']
+        except KeyError:
+            pass
+
+        try:
+            del dct['date_filter_field']
+        except KeyError:
+            pass
+
+        if self.phases:
+            for k, v in dct.items():
+                if '_filter' in k:
+                    del dct[k]
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
+
+    @property
+    def end_point(self):
+        try:
+            if self.whitelist_candidates:
+                wlp = '/permitted_users'
+            elif self.phases:
+                wlp = '/phases'
+            else:
+                wlp = ''
+        except AttributeError:
+            wlp = ''
+
+        if self.id:
+            if type(self.id) is list:
+                if wlp:
+                    raise InvalidCombinationError
+                self._filter_id__in = str(self.id)
+                ep = '/container'
+            else:
+                ep = f'/container/{self.id}{wlp}'
+        else:
+            ep = '/container'
+
+        logger.debug(f'Getting container {self.id}, {"phases" if wlp == "/phases" else ""}...')
+
+        return ep
+
+    @property
+    def data_key(self):
+        try:
+            if self.whitelist_candidates:
+                wlp = '/permitted_users'
+            elif self.phases:
+                wlp = '/phases'
+            else:
+                wlp = ''
+        except AttributeError:
+            wlp = ''
+
+        if self.id and not type(self.id) is list:
+            data_key = None
+        else:
+            data_key = 'data'
+
+        if wlp == '/permitted_users':
+            data_key = 'users'
+        elif wlp == '/phases':
+            data_key = 'data'
+
+        return data_key
+
+
+@dataclass
+class UserQuery(Query):
+    id: int = None
+
+    def __post_init__(self):
+        if not self.filter:
+            self.filter = {'_filter_type__in': '["normal", "automation"]'}
+
+        super().__post_init__()
+
+    @property
+    def end_point(self):
+        if self.id:
+            ep = f'/ph_user/{self.id}'
+        else:
+            ep = '/ph_user'
+
+        return ep
+
+    @property
+    def data_key(self):
+        if self.id and not type(self.id) is list:
+            data_key = None
+        else:
+            data_key = 'data'
+
+        return data_key
 
 
 if __name__ == '__main__':

@@ -18,13 +18,18 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
+import logging
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 
-from base_api_client.models.record import Record
-from phantom_api_client.models.artifact import ArtifactRequest
+from copy import deepcopy
+
+from base_api_client.models import Record, sort_dict
+from phantom_api_client.models import ArtifactRequest
 from phantom_api_client.models.custom_fields import CustomFields
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -33,7 +38,7 @@ class ContainerRequest(Record):
     close_time: Union[str, None] = None
     container_type: Union[str, None] = 'default'
     custom_fields: Union[CustomFields, dict, None] = None
-    data: Union[dict, None] = None
+    data: Union[dict, None] = field(default_factory=dict)
     description: Union[str, None] = None
     due_time: Union[str, None] = None
     end_time: Union[str, None] = None
@@ -42,7 +47,7 @@ class ContainerRequest(Record):
     label: str = None  # ContainerRequest Classification
     name: str = None  # Short Friendly ContainerRequest Name
     owner_id: Union[int, str, None] = None
-    run_automation: bool = False
+    run_automation: bool = True
     sensitivity: str = 'green'
     severity: str = 'low'
     source_data_identifier: Union[str, None] = None
@@ -52,22 +57,24 @@ class ContainerRequest(Record):
     tags: Union[str, list, None] = None
     tenant_id: Union[int, None] = None
     # Below are not part of the json object but used in the helper function
-    id: int = None
+    id: Union[int, List[int]] = None
     artifacts: List[ArtifactRequest] = field(default_factory=list)
 
     # todo: implement
     # comments: List[Comment] = field(default_factory=list)
     # attachments: List[Attachment] = field(default_factory=list)
-    # audit: List[AuditRequest] = field(default_factory=list)
 
     def __post_init__(self):
         if self.custom_fields and type(self.custom_fields) is CustomFields:
             self.custom_fields = self.custom_fields.dict()
 
-        self.data = {'request_id': uuid4().hex}
+        try:
+            self.data = {**self.data, 'request_id': uuid4().hex}
+        except TypeError:
+            self.data = {'request_id': uuid4().hex}
 
-    def update_id(self, id: int):
-        self.id = id
+    def update_id(self, container_id: int):
+        self.id = container_id
 
         if self.artifacts:
             for artifact in self.artifacts:
@@ -76,131 +83,41 @@ class ContainerRequest(Record):
         # todo: implement
         # if self.comments:
         #     for comment in self.comments:
-        #         comment.container_id = self.id
+        #         comment.id = self.id
         #
         # if self.attachments:
         #     for attachment in self.attachments:
-        #         attachment.container_id = self.id
+        #         attachment.id = self.id
 
-    def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
         """
         Args:
-            d (Optional[dict]):
-            sort_order (Optional[str]): ASC | DESC
             cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
 
         Returns:
-            d (dict):"""
-        d = {**self.__dict__}
-        del d['id']
-        del d['artifacts']
+            dct (dict):"""
+        dct = deepcopy(self.__dict__)
+        del dct['id']
+        del dct['artifacts']
         # todo: implement
         # del d['comments']
         # del d['attachments']
         # del d['audit']
 
         if cleanup:
-            d = {k: v for k, v in d.items() if v is not None}
+            dct = {k: v for k, v in dct.items() if v is not None}
 
         if sort_order:
-            d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
 
-        return d
+        return dct
+
+    @property
+    def end_point(self):
+        return f'/container/{self.id}'
 
 
 if __name__ == '__main__':
     print(__doc__)
-
-# fixme: Don't really see a need for this.
-# @dataclass
-# class ContainerRecord(Record):
-#     record: dict
-#     _pretty_artifact_update_time: Union[str, None] = None
-#     _pretty_asset: Union[str, None] = None
-#     _pretty_closing_owner: Union[str, None] = None
-#     _pretty_create_time: Union[str, None] = None
-#     _pretty_current_phase: Union[str, None] = None
-#     _pretty_due_time: Union[str, None] = None
-#     _pretty_ingest_app: Union[str, None] = None
-#     _pretty_owner: Union[str, None] = None
-#     _pretty_parent_container: Union[str, None] = None
-#     _pretty_past_due: Union[bool, None] = None
-#     _pretty_sla_delta: Union[str, None] = None
-#     _pretty_start_time: Union[str, None] = None
-#     _pretty_tenant: Union[str, None] = None
-#     artifact_count: Union[int, None] = None
-#     artifact_update_time: Union[str, dt.datetime, None] = None
-#     asset: Union[int, None] = None
-#     close_time: Union[str, dt.datetime, None] = None
-#     closing_owner: Union[int, None] = None
-#     closing_rule_run: Union[str, None] = None
-#     container_type: Union[str, None] = None  # Default (event) | Case
-#     container_update_time: Union[str, dt.datetime, None] = None
-#     create_time: Union[str, dt.datetime, None] = None
-#     current_phase: Union[str, None] = None
-#     custom_fields: Union[dict, None] = None
-#     data: Union[dict, None] = None
-#     description: Union[str, dt.datetime, None] = None
-#     due_time: Union[str, dt.datetime, None] = None
-#     end_time: Union[str, dt.datetime, None] = None
-#     hash: Union[str, None] = None
-#     id: Union[int, None] = None
-#     in_case: Union[bool, None] = None
-#     ingest_app: Union[str, None] = None
-#     kill_chain: Union[str, None] = None
-#     label: Union[str, None] = None
-#     name: Union[str, None] = None
-#     node_guid: Union[str, None] = None
-#     open_time: Union[str, dt.datetime, None] = None
-#     owner: Union[int, None] = None
-#     owner_name: Union[str, None] = None
-#     parent_container: Union[int, None] = None
-#     sensitivity: Union[str, None] = None
-#     severity: Union[str, None] = None
-#     source_data_identifier: Union[str, None] = None
-#     start_time: Union[str, dt.datetime, None] = None
-#     status: Union[str, None] = None
-#     tags: Union[List[str], None] = field(default_factory=list)
-#     tenant: Union[int, None] = None
-#     version: Union[int, None] = None
-#     # Extras
-#     request_id: str = None
-#     artifacts: Union[List[ArtifactRequest], Any] = field(default_factory=list)
-#     attachments: Union[List[Attachment], Any] = field(default_factory=list)
-#     audit_log: Union[List[AuditRecord], Any] = field(default_factory=list)
-#     comments: Union[List[Comment], Any] = field(default_factory=list)
-#
-#     def __post_init__(self):
-#         super(ContainerRecord, self).load(**self.record)
-#         print('post_artifacts:', self.artifacts)
-#
-#     def dict(self, d: dict = None, sort_order: str = 'ASC', cleanup: bool = True) -> dict:
-#         """
-#         Args:
-#             d (Optional[dict]):
-#             sort_order (Optional[str]): ASC | DESC
-#             cleanup (Optional[bool]):
-#
-#         Returns:
-#             d (dict):"""
-#         d = {**self.__dict__}
-#         del d['request_id']
-#         del d['id']
-#         del d['containers']
-#         del d['comments']
-#         del d['attachments']
-#
-#         # if type(d['attachments'][0]) is Attachment:
-#         #     d['attachments'] = [a.dict for a in self.attachments]
-#         #
-#         # if type(d['containers'][0]) is ArtifactRequest:
-#         #     d['containers'] = [a.dict for a in self.containers]
-#
-#         if cleanup:
-#             del self.record
-#             d = {k: v for k, v in d.items() if v is not None}
-#
-#         if sort_order:
-#             d = dict(sorted(d.items(), reverse=True if sort_order.lower() == 'desc' else False))
-#
-#         return d

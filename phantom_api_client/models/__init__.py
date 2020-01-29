@@ -24,7 +24,7 @@ from phantom_api_client.models.cef import Cef
 from phantom_api_client.models.comment import Comment
 from phantom_api_client.models.container import ContainerRequest
 from phantom_api_client.models.custom_fields import CustomFields
-from phantom_api_client.models.exceptions import InvalidOptionError
+from phantom_api_client.models.exceptions import InvalidCombinationError, InvalidOptionError
 from phantom_api_client.models.note import Note
 from phantom_api_client.models.pin import Pin
-from phantom_api_client.models.query import AuditQuery, ContainerQuery, Query
+from phantom_api_client.models.query import ArtifactQuery, AuditQuery, ContainerQuery, Query, UserQuery
