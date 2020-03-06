@@ -3,5 +3,5 @@
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.8.0b3 (sftp://infosecintegration@slflokydcaims01:22/opt/sea/phantom-api-client/.venv/bin/python3.8)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.8.1 (sftp://infosecintegration@slflokydcaims01.info53.com:22/opt/sea/phantom-api-client/.venv/bin/python3.8)" project-jdk-type="Python SDK" />
 </project>

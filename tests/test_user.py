@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Test User
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,12 +18,13 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
-
-import pytest
 from os import getenv
 from random import choice
 
-from base_api_client import bprint, Results, tprint
+import pytest
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
+
 from phantom_api_client.client import PhantomApiClient
 from phantom_api_client.models import UserQuery
 
@@ -33,7 +34,7 @@ async def test_get_user_count():
     ts = time.perf_counter()
 
     bprint('Test: Get User Count')
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(query=UserQuery())
         # print(results)
 
@@ -51,7 +52,7 @@ async def test_get_all_users():
     ts = time.perf_counter()
     bprint('Test: Get All Users')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(query=UserQuery())
         count = results.success[0]['count']
 
@@ -73,7 +74,7 @@ async def test_get_one_user():
     ts = time.perf_counter()
     bprint('Test: Get One User')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=UserQuery())
         uids = [u['id'] for u in results.success]
         uid = choice(uids)

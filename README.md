@@ -4,13 +4,13 @@
 |  _/ ' \/ _` | ' \  _/ _ \ '  \   / _ \|  _/| |  | (__| | / -_) ' \  _|
 |_| |_||_\__,_|_||_\__\___/_|_|_| /_/ \_\_| |___|  \___|_|_\___|_||_\__|
 ```
-
-![platform](https://img.shields.io/badge/Platform-Mac/*nix/Windows-blue.svg)
-![python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
-![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg)
-<a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg"></a>
-![0%](https://img.shields.io/badge/Coverage-75%25-red.svg)
-<a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"></a>
+![Platform: Linux/Mac/Windows](https://img.shields.io/badge/Platform-Linux/Mac/Windows-blue.svg?style=plastic "Platform: Linux/Mac/Windows")
+![Python 3.8.x](https://img.shields.io/badge/Python-3.8%2B-blue.svg?style=plastic "Python 3.8.x")
+![phantom](https://img.shields.io/badge/Phantom-4.5+-blue.svg?style=plastic)
+<a href="https://www.mongodb.com/licensing/server-side-public-license"><img src="https://img.shields.io/badge/License-SSPL-green.svg?style=plastic"></a>
+![Coverage 68%](https://img.shields.io/badge/Coverage-75%25-yellow.svg?style=plastic "Coverage 68%")
+<a href="https://saythanks.io/to/jerodg"><img src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg?style=plastic"></a>
+<a href="https://www.paypal.me/jerodgawne"><img src="https://img.shields.io/badge/Donate-orange.svg?style=plastic"></a>
 
 # Splunk-Phantom, API client.
 Client library for Phantom's REST API.
@@ -276,7 +276,7 @@ in a single page.
 
 
 ## License
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as

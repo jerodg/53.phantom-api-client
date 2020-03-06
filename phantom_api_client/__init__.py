@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Init
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,5 +18,4 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
-from phantom_api_client.client import PhantomApiClient
-from phantom_api_client.models import *
+from .client import PhantomApiClient

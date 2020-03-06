@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Models.Attachment
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,12 +18,11 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import logging
-from dataclasses import dataclass
-from typing import Union
-
 from base64 import b64encode
+from dataclasses import dataclass
 from os import stat
 from os.path import basename
+from typing import Union
 
 from phantom_api_client.models.exceptions import InvalidOptionError
 

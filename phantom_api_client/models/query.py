@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Models.Query
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -20,13 +20,13 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 import datetime as dt
 import logging
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from copy import deepcopy
+from base_api_client.models import Record, sort_dict
 from delorean import Delorean, parse
 
-from base_api_client.models import Record, sort_dict
 from phantom_api_client.models import InvalidCombinationError
 
 logger = logging.getLogger(__name__)
@@ -255,6 +255,13 @@ class AuditQuery(Query):
 
 @dataclass
 class ContainerQuery(Query):
+    """
+    Attributes:
+        id (Optional[Union[int, List[int]]])
+        _annotation_whitelist_users (Optional[Union[bool, int]])
+        whitelist_candidates (Optional[Union[bool, int]])
+        phases (Optional[Union[bool, int]])
+    """
     id: Optional[Union[int, List[int]]] = None
     _annotation_whitelist_users: Optional[Union[bool, int]] = None
     whitelist_candidates: Optional[Union[bool, int]] = None

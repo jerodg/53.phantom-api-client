@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Test Containers
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,12 +18,13 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
-
-import pytest
 from os import getenv
 from random import choice
 
-from base_api_client import bprint, Results, tprint
+import pytest
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
+
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery
 from tests.extras.generate_objects import generate_container
@@ -34,10 +35,8 @@ async def test_get_all_containers_count():
     ts = time.perf_counter()
     bprint('Test: Get All Containers Count')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_record_count(query=ContainerQuery())
-        # print(results)
-
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
+        results = await pac.get_record_count(query=ContainerQuery(page=0, page_size=1))
         assert type(results) is Results
         assert len(results.success) == 1
         assert not results.failure
@@ -52,7 +51,7 @@ async def test_get_all_containers_count_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Containers Count Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(query=ContainerQuery())
         unfiltered = results.success[0]['count']
 
@@ -76,16 +75,16 @@ async def test_get_all_containers():
     bprint('Test: Get All Containers')
 
     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_prod.toml') as pac:
-        # results = await pac.get_record_count(query=ContainerQuery(filter={'_filter_container_type': '"case"'}))
-        # count = results.success[0]['count']
+        results = await pac.get_record_count(query=ContainerQuery(filter={'_filter_container_type': '"case"'}))
+        count = results.success[0]['count']
         # print(f'Count: {count}')
 
-        # results = await pac.get_records(ContainerQuery())
-        results = await pac.get_records(query=ContainerQuery(page_size=100000, filter={'_filter_container_type': '"case"'}))
+        results = await pac.get_records(ContainerQuery())
+        # results = await pac.get_records(query=ContainerQuery(page_size=100000, filter={'_filter_container_type': '"case"'}))
         # print(results)
 
         assert type(results) is Results
-        # assert len(results.success) == count
+        assert len(results.success) == count
         assert not results.failure
 
         tprint(results, top=5)
@@ -98,11 +97,11 @@ async def test_get_all_containers_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Containers Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
-        results = await pac.get_record_count(query=ContainerQuery(filter={'_filter_tenant': 2}))
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
+        results = await pac.get_record_count(query=ContainerQuery(filter={'_filter_tenant': 1}))
         count = results.success[0]['count']
 
-        results = await pac.get_records(query=ContainerQuery(filter={'_filter_tenant': 2}))
+        results = await pac.get_records(query=ContainerQuery(filter={'_filter_tenant': 1}))
         # print(results)
 
         assert type(results) is Results
@@ -119,7 +118,7 @@ async def test_get_all_containers_date_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Containers Date Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(ContainerQuery(filter={'_filter_tenant': 2}))
         try:
             unfiltered = results.success[0]['count']
@@ -149,7 +148,7 @@ async def test_get_one_container():
     ts = time.perf_counter()
     bprint('Test: Get One Container')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
 
@@ -169,7 +168,7 @@ async def test_get_one_container_whitelist_users():
     ts = time.perf_counter()
     bprint('Test: Get One Container')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
 
@@ -191,7 +190,7 @@ async def test_get_one_container_whitelist_candidates():
     ts = time.perf_counter()
     bprint('Test: Get One Container Whitelist Candidates')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
 
@@ -212,7 +211,7 @@ async def test_get_one_container_phases():
     ts = time.perf_counter()
     bprint('Test: Get One Container Phases')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_container_type': '"case"'}))
         ids = [c['id'] for c in results.success]
 
@@ -233,7 +232,7 @@ async def test_get_many_containers():
     ts = time.perf_counter()
     bprint('Test: Get Many Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
 
@@ -281,7 +280,7 @@ async def test_create_many_containers():
     ts = time.perf_counter()
     bprint('Test: Create Many Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         response_results, request_results = await pac.create_containers(generate_container(container_count=2))
         # print(response_results)
 
@@ -306,7 +305,7 @@ async def test_update_one_container():
     ts = time.perf_counter()
     bprint('Test: Update One Container')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=20, filter={'_filter_tenant': 2}))
         old_container = choice(results.success)
         print(f'Container Prior Update\n\t-> {old_container}')
@@ -337,7 +336,7 @@ async def test_update_many_containers():
     ts = time.perf_counter()
     bprint('Test: Update Many Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50, filter={'_filter_tenant': 2}))
 
         old_containers = [choice(results.success), choice(results.success)]
@@ -376,7 +375,7 @@ async def test_delete_one_container():
     ts = time.perf_counter()
     bprint('Test: Delete One Container')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
         assert ids  # Need containers to test
@@ -408,7 +407,7 @@ async def test_delete_many_containers():
     ts = time.perf_counter()
     bprint('Test: Delete Many Containers')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
         assert ids  # Need containers to test

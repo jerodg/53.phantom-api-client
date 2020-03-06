@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Tests.Extras Containers
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -19,13 +19,14 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import datetime as dt
 import time
+from os import getenv
 from typing import NoReturn
 
 import pytest
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
 from delorean import Delorean, parse
-from os import getenv
 
-from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery
 
@@ -67,22 +68,22 @@ async def test_delete_containers() -> NoReturn:
         print('Deleting containers...')
         filtered_ids = filter_by_date(results)
 
-        # results1 = await pac.delete_records(record_ids=filtered_ids, query=Query(type='container'))
-        #
-        # assert type(results1) is Results
-        # assert not results1.failure
-        #
-        # tprint(results1, top=5)
+        results1 = await pac.delete_records(record_ids=filtered_ids, query=Query(type='container'))
 
-        # # Verify test containers have been deleted
-        # results2 = await pac.get_containers(Query(type='container', filter=f))
-        # record_ids = filter_by_date(results2.success)
-        # # print('results2', results2)
-        #
-        # assert type(results2) is Results
-        # assert len(record_ids) == 0
-        # assert not results2.failure
-        #
-        # tprint(results2, top=5)
+        assert type(results1) is Results
+        assert not results1.failure
+
+        tprint(results1, top=5)
+
+        # Verify test containers have been deleted
+        results2 = await pac.get_containers(Query(type='container', filter=f))
+        record_ids = filter_by_date(results2.success)
+        # print('results2', results2)
+
+        assert type(results2) is Results
+        assert len(record_ids) == 0
+        assert not results2.failure
+
+        tprint(results2, top=5)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

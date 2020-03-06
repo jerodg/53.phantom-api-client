@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Setup
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -63,10 +63,11 @@ def main() -> NoReturn:
                         'Say Thanks!':   'https://saythanks.io/to/jerodg',
                         'Source':        'https://github.com/jerodg/phantom-api-client'},
           python_requires='>=3.8, <3.9',
-          setup_requires=[] + ['pytest-runner'] if {'pytest', 'test', 'ptr'}.intersection(sys.argv) else [],
+          setup_requires=['base-api-client', 'delorean'] + ['pytest-runner'] if {'pytest', 'test', 'ptr'}
+          .intersection(sys.argv) else [],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/phantom-api-client/',
-          version='0!0.36.2',
+          version='0!0.36.3',
           zip_safe=True)
 
 

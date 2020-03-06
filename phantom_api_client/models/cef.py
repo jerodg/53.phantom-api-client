@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Models.Cef
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -22,7 +22,7 @@ import logging
 from dataclasses import dataclass
 from typing import Union
 
-from base_api_client import Record
+from base_api_client.models import Record
 
 logger = logging.getLogger(__name__)
 

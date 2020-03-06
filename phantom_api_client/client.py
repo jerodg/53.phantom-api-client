@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -23,9 +23,10 @@ import logging
 from typing import Any, List, NoReturn, Tuple, Union
 from uuid import uuid4
 
+from base_api_client import BaseApiClient
+from base_api_client.models import Results
 from delorean import parse
 
-from base_api_client import BaseApiClient, Results
 from phantom_api_client.models import *
 
 logger = logging.getLogger(__name__)
@@ -40,9 +41,7 @@ class PhantomApiClient(BaseApiClient):
         Args:
             cfg (Union[str, dict]): As a str it should contain a full path
                 pointing to a configuration file (json/toml). See
-                config.* in the examples folder for reference.
-            sem (Optional[int]): An integer that defines the number of parallel
-                requests to make."""
+                config.* in the examples folder for reference."""
         BaseApiClient.__init__(self, cfg=cfg)
 
     async def __aenter__(self):
@@ -83,13 +82,12 @@ class PhantomApiClient(BaseApiClient):
         if not query.page_size:
             query.page_size = 1
 
-        tasks = [asyncio.create_task(self.request(method='get',
-                                                  end_point=query.end_point,
-                                                  request_id=uuid4().hex,
-                                                  params=query.dict()))]
+        task = asyncio.create_task(self.request(method='get',
+                                                end_point=query.end_point,
+                                                request_id=uuid4().hex,
+                                                params=query.dict()))
 
-        logger.debug('-> Complete.')
-        return await self.process_results(Results(data=await asyncio.gather(*tasks)))
+        return await self.process_results(Results(data=await asyncio.gather(task)))
 
     async def get_records(self, query: Union[ArtifactQuery, AuditQuery, ContainerQuery]) -> Results:
         """
@@ -104,7 +102,7 @@ class PhantomApiClient(BaseApiClient):
             page_limit = 1
         else:
             if not query.id:
-                page_limit = (await self.get_record_count(query)).success[0]['num_pages']
+                page_limit = int(((await self.get_record_count(query)).success[0]['count'] / query.page_size) + 1)
             else:  # When we're getting a single container we can skip paging
                 page_limit = 1
 
@@ -123,7 +121,7 @@ class PhantomApiClient(BaseApiClient):
 
         return results
 
-    async def delete_records(self, query: Union[List[ArtifactQuery], List[ContainerQuery]]) -> Results:
+    async def delete_records(self, query: List[Union[ArtifactQuery, ContainerQuery]]) -> Results:
         """
 
         Args:

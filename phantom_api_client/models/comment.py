@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Models.Custom Fields
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as

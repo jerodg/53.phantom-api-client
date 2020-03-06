@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Test Artifacts
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,12 +18,13 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
-
-import pytest
 from os import getenv
 from random import choice
 
-from base_api_client import bprint, Results, tprint
+import pytest
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
+
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ArtifactQuery, ContainerQuery
 from tests.extras.generate_objects import generate_container
@@ -34,7 +35,7 @@ async def test_get_all_artifacts_count():
     ts = time.perf_counter()
     bprint('Test: Get All Artifacts Count')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(ArtifactQuery())
         # print(results)
 
@@ -52,7 +53,7 @@ async def test_get_all_artifacts_count_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Artifacts Count Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_record_count(ArtifactQuery())
         unfiltered = results.success[0]['count']
 
@@ -75,7 +76,7 @@ async def test_get_one_container_artifacts_count():
     ts = time.perf_counter()
     bprint('Test: Get One Container Artifacts Count')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50))
         ids = [c['id'] for c in results.success if c['artifact_count'] > 1]
         cid = choice(ids)
@@ -98,7 +99,7 @@ async def test_get_one_artifact():
     ts = time.perf_counter()
     bprint('Test: Get One Artifact')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ArtifactQuery(page=0, page_size=50, filter={'_filter_type': '"test"'}))
         ids = [c['id'] for c in results.success]
         aid = choice(ids)
@@ -121,7 +122,7 @@ async def test_get_one_artifact():
 #     ts = time.perf_counter()
 #     bprint('Test: Get All Artifacts')
 #
-#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+#     async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
 #         results = await pac.get_record_count(ArtifactQuery())
 #         count = results.success[0]['count']
 #         assert count
@@ -143,7 +144,7 @@ async def test_get_all_artifacts_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Artifacts Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         f = {'_filter_type': '"test"'}
         results = await pac.get_record_count(ArtifactQuery(filter=f))
         count = results.success[0]['count']
@@ -166,7 +167,7 @@ async def test_get_all_artifacts_date_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Artifacts Date Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         f = {'_filter_type': '"test"'}
         results = await pac.get_record_count(ArtifactQuery(filter=f))
         unfiltered = results.success[0]['count']
@@ -195,7 +196,7 @@ async def test_get_all_container_artifacts():
     ts = time.perf_counter()
     bprint('Test: Get All Container Artifacts')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50))
         ids = [c['id'] for c in results.success if c['artifact_count'] > 1]
         cid = choice(ids)
@@ -222,7 +223,7 @@ async def test_get_all_container_artifacts_date_filtered():
     ts = time.perf_counter()
     bprint('Test: Get All Container Artifacts Date Filtered')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         f = {'_filter_type': '"test"'}
         results = await pac.get_record_count(ArtifactQuery(filter=f))
         unfiltered = results.success[0]['count']
@@ -251,7 +252,7 @@ async def test_create_one_artifact():
     ts = time.perf_counter()
     bprint('Test: Create One Artifact')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         container = generate_container(artifact_count=1)
         results = await pac.get_records(ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
@@ -279,7 +280,7 @@ async def test_create_many_artifacts():
     ts = time.perf_counter()
     bprint('Test: Create Many Artifacts')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         container = generate_container(artifact_count=2)
         results = await pac.get_records(ContainerQuery(filter={'_filter_tenant': 2}))
         ids = [c['id'] for c in results.success]
@@ -337,7 +338,7 @@ async def test_update_one_artifact():
     ts = time.perf_counter()
     bprint('Test: Update One Artifact')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         container = generate_container(artifact_count=1)[0]
         artifact = container.artifacts[0]
         rid = artifact.data['request_id']
@@ -371,7 +372,7 @@ async def test_update_many_artifacts():
     ts = time.perf_counter()
     bprint('Test: Update Many Artifacts')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         container = generate_container(artifact_count=2)[0]
         artifacts = container.artifacts
         rids = [a.data['request_id'] for a in artifacts]
@@ -410,7 +411,7 @@ async def test_delete_one_artifact():
     ts = time.perf_counter()
     bprint('Test: Delete One Artifact')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(ArtifactQuery(filter={'_filter_type': '"test"'}))
         ids = [c['id'] for c in results.success]
         aid = choice(ids)
@@ -441,7 +442,7 @@ async def test_delete_many_artifacts():
     ts = time.perf_counter()
     bprint('Test: Delete Many Artifacts')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(ArtifactQuery(filter={'_filter_type': '"test"'}))
         ids = [c['id'] for c in results.success]
         aids = [choice(ids), choice(ids)]
@@ -475,7 +476,7 @@ async def test_delete_all_container_artifacts():
     ts = time.perf_counter()
     bprint('Test: Delete All Container Artifacts')
 
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_records(query=ContainerQuery(page=0, page_size=50))
         ids = [c['id'] for c in results.success if c['artifact_count'] > 1]
         cid = choice(ids)

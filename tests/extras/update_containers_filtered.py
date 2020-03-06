@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Tests.Extras Update Containers Filtered
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -18,12 +18,13 @@ copies or substantial portions of the Software.
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import time
+from os import getenv
 from typing import NoReturn
 
 import pytest
-from os import getenv
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
 
-from base_api_client import bprint, Results, tprint
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerRequest, Query
 
@@ -33,7 +34,7 @@ async def test_update_containers_filtered() -> NoReturn:
     ts = time.perf_counter()
 
     bprint('Test: Update Containers Filtered')
-    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client.toml') as pac:
+    async with PhantomApiClient(cfg=f'{getenv("CFG_HOME")}/phantom_api_client_dev.toml') as pac:
         results = await pac.get_container_count(query=Query(type='container',
                                                             filter={'_filter_name__icontains': '"mcafee"',
                                                                     '_filter_label':           '"events"'}))

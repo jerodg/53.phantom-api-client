@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Tests.Extras Containers
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -19,12 +19,13 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 import datetime as dt
 import time
-
-import pytest
-from delorean import Delorean, parse
 from os import getenv
 
-from base_api_client import bprint, Results, tprint
+import pytest
+from base_api_client import bprint, tprint
+from base_api_client.models import Results
+from delorean import Delorean, parse
+
 from phantom_api_client import PhantomApiClient
 from phantom_api_client.models import ContainerQuery
 

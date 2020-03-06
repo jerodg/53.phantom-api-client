@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.8
 """Phantom API Client: Models.ContainerRequest
-Copyright © 2019 Jerod Gawne <https://github.com/jerodg/>
+Copyright © 2019-2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the Server Side Public License (SSPL) as
@@ -19,13 +19,13 @@ You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 import logging
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 from uuid import uuid4
 
-from copy import deepcopy
-
 from base_api_client.models import Record, sort_dict
+
 from phantom_api_client.models import ArtifactRequest
 from phantom_api_client.models.custom_fields import CustomFields
 
